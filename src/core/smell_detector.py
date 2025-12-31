@@ -315,23 +315,22 @@ class {node.name}Presenter:   # Presentation
         Detect unnecessary code.
         """
         for node in ast.walk(tree):
-            if isinstance(node, ast.FunctionDef):
-                # Lazy Class (class that doesn't do enough)
-                if isinstance(node, ast.ClassDef):
-                    methods = [n for n in node.body if isinstance(n, ast.FunctionDef)]
-                    real_methods = [m for m in methods if m.name not in ['__init__', '__str__', '__repr__']]
-                    
-                    if len(real_methods) < 2:
-                        self.smells.append(CodeSmell(
-                            name="Lazy Class",
-                            severity="LOW",
-                            category="Dispensable",
-                            description=f"Class '{node.name}' only has {len(real_methods)} method(s)",
-                            location=file_path,
-                            line=node.lineno,
-                            impact="Unnecessary abstraction. Adds complexity without value.",
-                            refactoring_suggestion="Remove class and inline functionality, or add more behavior.",
-                            code_example=f"""# Current:
+            # Lazy Class (class that doesn't do enough)
+            if isinstance(node, ast.ClassDef):
+                methods = [n for n in node.body if isinstance(n, ast.FunctionDef)]
+                real_methods = [m for m in methods if m.name not in ['__init__', '__str__', '__repr__']]
+                
+                if len(real_methods) < 2:
+                    self.smells.append(CodeSmell(
+                        name="Lazy Class",
+                        severity="LOW",
+                        category="Dispensable",
+                        description=f"Class '{node.name}' only has {len(real_methods)} method(s)",
+                        location=file_path,
+                        line=node.lineno,
+                        impact="Unnecessary abstraction. Adds complexity without value.",
+                        refactoring_suggestion="Remove class and inline functionality, or add more behavior.",
+                        code_example=f"""# Current:
 class {node.name}:
     def __init__(self, x):
         self.x = x
@@ -341,10 +340,10 @@ class {node.name}:
 
 # Refactor: Just use the value directly
 # Or add more meaningful behavior to justify the class"""
-                        ))
-                
-                # Speculative Generality (unused abstraction)
-                # Dead Code
+                    ))
+            
+            # Dead Code - deprecated functions
+            if isinstance(node, ast.FunctionDef):
                 docstring = ast.get_docstring(node)
                 if docstring and 'deprecated' in docstring.lower():
                     self.smells.append(CodeSmell(

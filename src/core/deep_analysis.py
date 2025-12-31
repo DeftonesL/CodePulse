@@ -288,7 +288,8 @@ class DeepAnalysisEngine:
                         'severity': 'error',
                         'message': 'Detected potential infinite loop'
                     })
-        except:
+        except (ValueError, TypeError, KeyError) as e:
+            # Log error but continue analysis
             pass
         
         # Analyze branching complexity
@@ -408,7 +409,7 @@ class DeepAnalysisEngine:
                     'count': len(cycles),
                     'message': f'Found {len(cycles)} circular dependencies'
                 })
-        except:
+        except (ValueError, TypeError, AttributeError) as e:
             cycles = []
         
         # Calculate coupling metrics
@@ -435,7 +436,7 @@ class DeepAnalysisEngine:
                 )
             else:
                 longest_path = 0
-        except:
+        except (ValueError, TypeError, nx.NetworkXError) as e:
             longest_path = 0
         
         return {

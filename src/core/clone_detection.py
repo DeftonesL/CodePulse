@@ -64,7 +64,8 @@ class CloneDetector:
         try:
             tree = ast.parse(''.join(lines))
             self._detect_type2_clones(tree, file_path)
-        except:
+        except (SyntaxError, ValueError) as e:
+            # Skip files with syntax errors
             pass
         
         return self.clones

@@ -6,19 +6,14 @@
 # CORE ANALYSIS (Required)
 # ═══════════════════════════════════════════════════════════════
 
+# CLI and Terminal UI
+click>=8.0.0       # Command-line interface
+rich>=13.0.0       # Rich text and beautiful formatting in terminal
+
 # Graph algorithms - Used ONLY for graph data structures
 # All analysis algorithms are custom-built!
 networkx>=3.0
 
-# Note: The following are built-in Python libraries
-# Listed here for documentation:
-# - ast: AST parsing
-# - difflib: Sequence matching for clone detection
-# - hashlib: Hashing for rolling hash algorithm
-# - re: Pattern matching
-# - typing: Type hints
-# - dataclasses: Data structures
-# - collections: Specialized containers
 
 # ═══════════════════════════════════════════════════════════════
 # OPTIONAL: AI INTEGRATION
@@ -32,28 +27,10 @@ openai>=1.0.0      # OpenAI GPT (optional enhancement)
 # ═══════════════════════════════════════════════════════════════
 # Install with: pip install -e .[dev]
 
-# Testing
+
 pytest>=8.0.0
 pytest-cov>=4.1.0
 
-# Code quality
+
 black>=24.0.0
 mypy>=1.8.0
-
-# ═══════════════════════════════════════════════════════════════
-# NOTE ABOUT DEPENDENCIES
-# ═══════════════════════════════════════════════════════════════
-# CodePulse uses MINIMAL external dependencies by design.
-# 
-# We DO NOT use:
-# - pylint (we have custom analysis)
-# - flake8 (we have custom checks)
-# - radon (we calculate our own metrics)
-# - bandit (we have custom security scanner)
-#
-# Why? To ensure:
-# ✓ Original algorithms and implementation
-# ✓ Full control over analysis logic
-# ✓ Educational value (understand how tools work)
-# ✓ Custom metrics and formulas
-# ═══════════════════════════════════════════════════════════════
