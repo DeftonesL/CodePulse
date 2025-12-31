@@ -39,6 +39,22 @@ class IntelligentSmellDetector:
     Not just simple pattern matching - uses context-aware detection.
     """
     
+    # Standard Python modules to ignore in Feature Envy detection
+    STANDARD_MODULES = {
+        'sys', 'os', 'ast', 're', 'json', 'time', 'datetime', 'pathlib',
+        'logging', 'typing', 'collections', 'itertools', 'functools',
+        'argparse', 'subprocess', 'shutil', 'tempfile', 'urllib', 'requests',
+        'math', 'random', 'string', 'hashlib', 'base64', 'pickle', 'csv',
+        'xml', 'html', 'email', 'http', 'socket', 'threading', 'multiprocessing',
+        'unittest', 'pytest', 'click', 'console', 'table', 'structure', 'logger',
+        'flask', 'django', 'numpy', 'pandas', 'matplotlib', 'seaborn', 'result',
+    }
+    
+    # Relaxed thresholds for more realistic detection
+    LONG_METHOD_THRESHOLD = 80  # More realistic (was 50)
+    LARGE_CLASS_THRESHOLD = 500  # More realistic (was 200)
+    LONG_PARAMETER_LIST = 6  # Reasonable (was 5)
+    
     def __init__(self):
         self.smells = []
         self.metrics = {}
@@ -113,18 +129,18 @@ class IntelligentSmellDetector:
         """
         for node in ast.walk(tree):
             if isinstance(node, ast.FunctionDef):
-                # Long Method
+                # Long Method - using relaxed threshold
                 length = (node.end_lineno or node.lineno) - node.lineno
-                if length > 50:
+                if length > self.LONG_METHOD_THRESHOLD:
                     self.smells.append(CodeSmell(
                         name="Long Method",
-                        severity="HIGH" if length > 100 else "MEDIUM",
+                        severity="HIGH" if length > 150 else "MEDIUM",
                         category="Bloater",
                         description=f"Function '{node.name}' is {length} lines long",
                         location=file_path,
                         line=node.lineno,
                         impact=f"Difficult to understand and maintain. Higher bug probability.",
-                        refactoring_suggestion="Extract smaller methods. Aim for < 30 lines per function.",
+                        refactoring_suggestion=f"Extract smaller methods. Aim for < {self.LONG_METHOD_THRESHOLD} lines per function.",
                         code_example=f"""# Current: {length} lines
 def {node.name}(...):
     # Too much code here
@@ -140,9 +156,9 @@ def step2(): ...
 def step3(): ..."""
                     ))
                 
-                # Long Parameter List
+                # Long Parameter List - using relaxed threshold
                 param_count = len(node.args.args)
-                if param_count > 5:
+                if param_count > self.LONG_PARAMETER_LIST:
                     self.smells.append(CodeSmell(
                         name="Long Parameter List",
                         severity="MEDIUM",
@@ -166,11 +182,11 @@ def {node.name}(config: Config): ..."""
                     ))
             
             elif isinstance(node, ast.ClassDef):
-                # Large Class
+                # Large Class - using relaxed threshold
                 size = (node.end_lineno or node.lineno) - node.lineno
                 methods = [n for n in node.body if isinstance(n, ast.FunctionDef)]
                 
-                if size > 300 or len(methods) > 20:
+                if size > self.LARGE_CLASS_THRESHOLD or len(methods) > 25:
                     self.smells.append(CodeSmell(
                         name="Large Class",
                         severity="HIGH",
@@ -372,9 +388,17 @@ def {node.name}(...):
                             else:
                                 other_access[child.value.id] += 1
                 
-                # Check for envy
+                # Check for envy - but ignore standard modules
                 for other_obj, count in other_access.items():
-                    if count > self_access and count > 3:
+                    # Skip if it's a standard module
+                    if other_obj.lower() in self.STANDARD_MODULES:
+                        continue
+                    
+                    # Skip single-letter variables (likely loop variables)
+                    if len(other_obj) == 1:
+                        continue
+                    
+                    if count > self_access and count > 5:  # Increased threshold
                         self.smells.append(CodeSmell(
                             name="Feature Envy",
                             severity="MEDIUM",

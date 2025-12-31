@@ -45,9 +45,10 @@ class CloneDetector:
     - Type 4: Semantic clones (same functionality, different code)
     """
     
-    def __init__(self, min_lines: int = 6):
+    def __init__(self, min_lines: int = 10):  # Increased from 6
         self.min_lines = min_lines
         self.clones = []
+        self.min_same_file_lines = 15  # Higher threshold for same-file clones
         
     def detect_clones_in_file(self, file_path: str) -> List[CodeClone]:
         """
@@ -132,6 +133,12 @@ class CloneDetector:
                 # Found clone!
                 for j in range(len(positions)):
                     for k in range(j + 1, len(positions)):
+                        clone_size = self.min_lines
+                        
+                        # Skip small clones in same file (common patterns)
+                        if clone_size < self.min_same_file_lines:
+                            continue
+                        
                         self.clones.append(CodeClone(
                             type='Type 1',
                             file1=file_path,

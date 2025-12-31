@@ -215,9 +215,23 @@ class AdvancedLanguageScanner:
     def _scan_javascript(self, lines: List[str], file_path: str, language: str):
         """Scan JavaScript/TypeScript"""
         for i, line in enumerate(lines, 1):
+            stripped = line.strip()
+            
+            # Skip comments
+            if stripped.startswith('//') or stripped.startswith('/*') or stripped.startswith('*'):
+                continue
+            
+            # Skip if it's in a string literal (common false positive)
+            if "includes('eval" in stripped or '"eval' in stripped or "'eval" in stripped:
+                continue
+            
+            # Skip documentation/examples
+            if 'example' in stripped.lower() or 'avoid' in stripped.lower():
+                continue
+            
             # Dangerous functions
             for pattern, desc, severity in self.patterns.JAVASCRIPT['dangerous_functions']:
-                if re.search(pattern, line, re.IGNORECASE):
+                if re.search(pattern, stripped, re.IGNORECASE):
                     self.issues.append(SecurityIssue(
                         type='Dangerous Function',
                         severity=severity,
@@ -233,7 +247,11 @@ class AdvancedLanguageScanner:
             
             # DOM XSS
             for pattern, desc, severity in self.patterns.JAVASCRIPT['dom_xss']:
-                if re.search(pattern, line):
+                if re.search(pattern, stripped):
+                    # Skip if it's checking for the pattern (not using it)
+                    if '.test(' in stripped or 'includes(' in stripped:
+                        continue
+                    
                     self.issues.append(SecurityIssue(
                         type='XSS Vulnerability',
                         severity=severity,

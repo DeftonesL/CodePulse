@@ -638,6 +638,10 @@ def main():
     target = sys.argv[1]
     scanner = ComprehensiveScanner()
     
+    # Create reports directory if it doesn't exist
+    reports_dir = os.path.join(os.getcwd(), 'reports')
+    os.makedirs(reports_dir, exist_ok=True)
+    
     if os.path.isfile(target):
         # Single file scan
         print(f"\n{'='*70}")
@@ -652,8 +656,9 @@ def main():
         
         scanner.print_summary()
         
-        # Save report
-        report_path = f"comprehensive_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+        # Save report in reports directory
+        report_filename = f"comprehensive_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+        report_path = os.path.join(reports_dir, report_filename)
         scanner.save_report(report_path)
         
     elif os.path.isdir(target):
@@ -701,8 +706,10 @@ def main():
             icon = "🔴" if score < 60 else "🟡" if score < 80 else "🟢"
             print(f"{i}. {icon} {filename:30s} {score:5.1f}/100")
         
-        # Save report
-        report_path = f"project_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+        # Save report in reports directory
+        report_filename = f"project_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+        report_path = os.path.join(reports_dir, report_filename)
+        
         try:
             safe_results = scanner._make_json_serializable(results)
             with open(report_path, 'w', encoding='utf-8') as f:
