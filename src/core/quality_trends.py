@@ -43,7 +43,8 @@ class QualityTrendsAnalyzer:
                 with open(self.history_file, 'r') as f:
                     data = json.load(f)
                 return [QualitySnapshot(**item) for item in data]
-            except:
+            except (IOError, json.JSONDecodeError, KeyError) as e:
+                # Failed to load history file
                 return []
         return []
     

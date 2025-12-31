@@ -21,6 +21,13 @@ networkx>=3.0
 # - collections: Specialized containers
 
 # ═══════════════════════════════════════════════════════════════
+# CLI INTERFACE
+# ═══════════════════════════════════════════════════════════════
+
+click>=8.0.0       # Command-line interface framework
+rich>=13.0.0       # Rich terminal output formatting
+
+# ═══════════════════════════════════════════════════════════════
 # OPTIONAL: AI INTEGRATION
 # ═══════════════════════════════════════════════════════════════
 

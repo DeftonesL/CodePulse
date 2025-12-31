@@ -288,7 +288,8 @@ class DeepAnalysisEngine:
                         'severity': 'error',
                         'message': 'Detected potential infinite loop'
                     })
-        except:
+        except Exception as e:
+            # Failed to detect infinite loops
             pass
         
         # Analyze branching complexity
@@ -408,7 +409,8 @@ class DeepAnalysisEngine:
                     'count': len(cycles),
                     'message': f'Found {len(cycles)} circular dependencies'
                 })
-        except:
+        except Exception as e:
+            # Failed to find circular dependencies
             cycles = []
         
         # Calculate coupling metrics
@@ -435,7 +437,8 @@ class DeepAnalysisEngine:
                 )
             else:
                 longest_path = 0
-        except:
+        except Exception as e:
+            # Failed to calculate longest path
             longest_path = 0
         
         return {

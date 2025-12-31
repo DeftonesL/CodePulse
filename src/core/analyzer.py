@@ -446,9 +446,8 @@ def main():
     # Create reports directory if it doesn't exist
     reports_dir = "reports"
     os.makedirs(reports_dir, exist_ok=True)
-    
+
     # Generate filename with timestamp
-    from datetime import datetime
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     output_file = os.path.join(reports_dir, f"comprehensive_report_{timestamp}.json")
     

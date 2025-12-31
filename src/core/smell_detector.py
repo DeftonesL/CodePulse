@@ -35,10 +35,17 @@ class CodeSmell:
 class IntelligentSmellDetector:
     """
     Detects code smells using intelligent analysis.
-    
+
     Not just simple pattern matching - uses context-aware detection.
     """
-    
+
+    # Configuration constants
+    MAX_METHOD_LENGTH = 50  # Maximum lines for a method
+    MAX_CLASS_LENGTH = 200  # Maximum lines for a class
+    MAX_PARAMETERS = 5  # Maximum parameters for a function
+    MAX_NESTING_DEPTH = 3  # Maximum nesting depth
+    MIN_LAZY_CLASS_METHODS = 2  # Minimum methods to justify a class
+
     def __init__(self):
         self.smells = []
         self.metrics = {}
@@ -52,7 +59,8 @@ class IntelligentSmellDetector:
         
         try:
             tree = ast.parse(code)
-        except:
+        except SyntaxError as e:
+            # Failed to parse file, skip smell detection
             return []
         
         # Calculate file-level metrics first
@@ -115,7 +123,7 @@ class IntelligentSmellDetector:
             if isinstance(node, ast.FunctionDef):
                 # Long Method
                 length = (node.end_lineno or node.lineno) - node.lineno
-                if length > 50:
+                if length > self.MAX_METHOD_LENGTH:
                     self.smells.append(CodeSmell(
                         name="Long Method",
                         severity="HIGH" if length > 100 else "MEDIUM",
@@ -142,7 +150,7 @@ def step3(): ..."""
                 
                 # Long Parameter List
                 param_count = len(node.args.args)
-                if param_count > 5:
+                if param_count > self.MAX_PARAMETERS:
                     self.smells.append(CodeSmell(
                         name="Long Parameter List",
                         severity="MEDIUM",
@@ -299,34 +307,35 @@ class {node.name}Presenter:   # Presentation
         Detect unnecessary code.
         """
         for node in ast.walk(tree):
-            if isinstance(node, ast.FunctionDef):
-                # Lazy Class (class that doesn't do enough)
-                if isinstance(node, ast.ClassDef):
-                    methods = [n for n in node.body if isinstance(n, ast.FunctionDef)]
-                    real_methods = [m for m in methods if m.name not in ['__init__', '__str__', '__repr__']]
-                    
-                    if len(real_methods) < 2:
-                        self.smells.append(CodeSmell(
-                            name="Lazy Class",
-                            severity="LOW",
-                            category="Dispensable",
-                            description=f"Class '{node.name}' only has {len(real_methods)} method(s)",
-                            location=file_path,
-                            line=node.lineno,
-                            impact="Unnecessary abstraction. Adds complexity without value.",
-                            refactoring_suggestion="Remove class and inline functionality, or add more behavior.",
-                            code_example=f"""# Current:
+            # Lazy Class (class that doesn't do enough)
+            if isinstance(node, ast.ClassDef):
+                methods = [n for n in node.body if isinstance(n, ast.FunctionDef)]
+                real_methods = [m for m in methods if m.name not in ['__init__', '__str__', '__repr__']]
+
+                if len(real_methods) < self.MIN_LAZY_CLASS_METHODS:
+                    self.smells.append(CodeSmell(
+                        name="Lazy Class",
+                        severity="LOW",
+                        category="Dispensable",
+                        description=f"Class '{node.name}' only has {len(real_methods)} method(s)",
+                        location=file_path,
+                        line=node.lineno,
+                        impact="Unnecessary abstraction. Adds complexity without value.",
+                        refactoring_suggestion="Remove class and inline functionality, or add more behavior.",
+                        code_example=f"""# Current:
 class {node.name}:
     def __init__(self, x):
         self.x = x
-    
+
     def get_x(self):
         return self.x
 
 # Refactor: Just use the value directly
 # Or add more meaningful behavior to justify the class"""
-                        ))
-                
+                    ))
+
+            # Dead Code in functions
+            if isinstance(node, ast.FunctionDef):
                 # Speculative Generality (unused abstraction)
                 # Dead Code
                 docstring = ast.get_docstring(node)

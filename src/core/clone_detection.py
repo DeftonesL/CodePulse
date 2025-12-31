@@ -37,15 +37,20 @@ class CodeClone:
 class CloneDetector:
     """
     Advanced code clone detection.
-    
+
     Detects 4 types of clones:
-    - Type 1: Exact copies (除了 whitespace/comments)
+    - Type 1: Exact copies (except for whitespace/comments)
     - Type 2: Renamed identifiers
     - Type 3: Modified statements
     - Type 4: Semantic clones (same functionality, different code)
     """
-    
-    def __init__(self, min_lines: int = 6):
+
+    # Configuration constants
+    TYPE2_SIMILARITY_THRESHOLD = 0.80  # 80% similarity for Type 2 clones
+    TYPE4_SIMILARITY_THRESHOLD = 0.70  # 70% similarity for Type 4 clones
+    DEFAULT_MIN_LINES = 6  # Minimum lines to consider as clone
+
+    def __init__(self, min_lines: int = DEFAULT_MIN_LINES):
         self.min_lines = min_lines
         self.clones = []
         
@@ -63,7 +68,8 @@ class CloneDetector:
         try:
             tree = ast.parse(''.join(lines))
             self._detect_type2_clones(tree, file_path)
-        except:
+        except SyntaxError as e:
+            # Failed to parse file for Type 2 clone detection
             pass
         
         return self.clones
@@ -163,8 +169,8 @@ class CloneDetector:
                     functions[i],
                     functions[j]
                 )
-                
-                if similarity > 0.80:  # 80% similar
+
+                if similarity > self.TYPE2_SIMILARITY_THRESHOLD:
                     self.clones.append(CodeClone(
                         type='Type 2',
                         file1=file_path,
@@ -181,7 +187,7 @@ class CloneDetector:
         Hash a block of code.
         """
         combined = ''.join(lines)
-        return hashlib.md5(combined.encode()).hexdigest()
+        return hashlib.sha256(combined.encode()).hexdigest()
     
     def _calculate_similarity(self, block1: List[str], block2: List[str]) -> float:
         """
@@ -337,8 +343,8 @@ class SemanticCloneDetector:
                     functions[i]['behavior'],
                     functions[j]['behavior']
                 )
-                
-                if similarity > 0.70:  # 70% behavioral similarity
+
+                if similarity > self.TYPE4_SIMILARITY_THRESHOLD:
                     self.semantic_clones.append({
                         'function1': functions[i]['name'],
                         'function2': functions[j]['name'],

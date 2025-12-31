@@ -56,7 +56,8 @@ class AdvancedSecurityScanner:
             with open(file_path, 'r', encoding='utf-8') as f:
                 content = f.read()
                 lines = content.split('\n')
-        except:
+        except (IOError, UnicodeDecodeError) as e:
+            # Failed to read file
             return []
         
         try:

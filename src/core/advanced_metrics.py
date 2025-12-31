@@ -15,10 +15,11 @@ License: MIT
 """
 
 import ast
+import json
 import math
 import re
 from typing import Dict, List, Any, Set
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
 from collections import defaultdict
 
 

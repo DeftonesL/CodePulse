@@ -32,14 +32,15 @@ class HTMLScanner:
     def scan(self, file_path: str) -> List[SecurityIssue]:
         """Scan HTML file"""
         self.issues = []
-        
+
         try:
             with open(file_path, 'r', encoding='utf-8') as f:
                 content = f.read()
                 lines = content.split('\n')
-        except:
+        except (IOError, UnicodeDecodeError) as e:
+            # Failed to read HTML file
             return []
-        
+
         # Check for XSS vulnerabilities
         self._check_inline_scripts(lines, file_path)
         self._check_dangerous_attributes(lines, file_path)
@@ -193,13 +194,14 @@ class JSONScanner:
     def scan(self, file_path: str) -> List[SecurityIssue]:
         """Scan JSON file"""
         self.issues = []
-        
+
         try:
             with open(file_path, 'r', encoding='utf-8') as f:
                 content = f.read()
-        except:
+        except (IOError, UnicodeDecodeError) as e:
+            # Failed to read JSON file
             return []
-        
+
         # Check syntax
         try:
             data = json.loads(content)
@@ -294,14 +296,15 @@ class SQLScanner:
     def scan(self, file_path: str) -> List[SecurityIssue]:
         """Scan SQL file"""
         self.issues = []
-        
+
         try:
             with open(file_path, 'r', encoding='utf-8') as f:
                 content = f.read()
                 lines = content.split('\n')
-        except:
+        except (IOError, UnicodeDecodeError) as e:
+            # Failed to read SQL file
             return []
-        
+
         self._check_sql_injection_patterns(lines, file_path)
         self._check_dangerous_operations(lines, file_path)
         self._check_authentication(lines, file_path)

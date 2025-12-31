@@ -91,9 +91,9 @@ class ArchitectureAnalyzer:
             try:
                 with open(file_path, 'r', encoding='utf-8') as f:
                     tree = ast.parse(f.read(), filename=file_path)
-                
+
                 self.dependency_graph.add_node(file_path)
-                
+
                 # Extract imports
                 for node in ast.walk(tree):
                     if isinstance(node, (ast.Import, ast.ImportFrom)):
@@ -103,7 +103,8 @@ class ArchitectureAnalyzer:
                             resolved = self._resolve_import(module, file_path, files)
                             if resolved:
                                 self.dependency_graph.add_edge(file_path, resolved)
-            except:
+            except (IOError, SyntaxError, UnicodeDecodeError) as e:
+                # Skip files that can't be read or parsed
                 continue
     
     def _build_module_graph(self, files: List[str]):
@@ -158,7 +159,7 @@ class ArchitectureAnalyzer:
         """Detect circular dependencies between files"""
         try:
             cycles = list(nx.simple_cycles(self.dependency_graph))
-            
+
             for cycle in cycles:
                 if len(cycle) > 1:
                     self.issues.append(CrossFileIssue(
@@ -169,7 +170,8 @@ class ArchitectureAnalyzer:
                         impact="Cannot test modules independently. Changes propagate unpredictably.",
                         suggestion="Break cycle using dependency injection or interface abstraction."
                     ))
-        except:
+        except Exception as e:
+            # Failed to detect cycles (graph might be empty or invalid)
             pass
     
     def _detect_god_modules(self):
@@ -254,7 +256,8 @@ class ArchitectureAnalyzer:
                             impact="Could be extracted to separate module/package.",
                             suggestion="Consider extracting as independent module for better organization."
                         ))
-        except:
+        except Exception as e:
+            # Failed to detect feature clusters
             pass
     
     def _calculate_architecture_metrics(self):
@@ -267,13 +270,15 @@ class ArchitectureAnalyzer:
                     self.module_graph.to_undirected()
                 )
             )
-        except:
+        except Exception as e:
+            # Failed to calculate modularity (graph might be empty or invalid)
             modularity = 0.0
-        
+
         # Average clustering coefficient
         try:
             clustering = nx.average_clustering(self.dependency_graph.to_undirected())
-        except:
+        except Exception as e:
+            # Failed to calculate clustering (graph might be empty or invalid)
             clustering = 0.0
         
         # Density
@@ -333,9 +338,10 @@ class CodeDuplicationAnalyzer:
             try:
                 with open(file_path, 'r', encoding='utf-8') as f:
                     lines = [l.strip() for l in f.readlines() if l.strip() and not l.strip().startswith('#')]
-                
+
                 file_hashes[file_path] = self._hash_code_blocks(lines)
-            except:
+            except (IOError, UnicodeDecodeError) as e:
+                # Skip files that can't be read
                 continue
         
         # Find duplicates across files

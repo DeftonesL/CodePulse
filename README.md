@@ -72,7 +72,7 @@ Data Flow Analysis:
 **What it does**: Finds duplicated code using 4 different algorithms
 
 **Clone Types:**
-- **Type 1**: Exact copies (除了 whitespace)
+- **Type 1**: Exact copies (except for whitespace)
 - **Type 2**: Renamed variables (same structure)
 - **Type 3**: Modified statements (similar code)
 - **Type 4**: Semantic clones (same functionality, different code)
