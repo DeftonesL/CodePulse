@@ -45,12 +45,36 @@ except:
     from src.core.advanced_security import AdvancedSecurityScanner
 
 try:
+    from multi_format_scanner import MultiFormatScanner
+except:
+    try:
+        from src.core.multi_format_scanner import MultiFormatScanner
+    except:
+        MultiFormatScanner = None
+
+try:
+    from advanced_language_scanner import AdvancedLanguageScanner
+except:
+    try:
+        from src.core.advanced_language_scanner import AdvancedLanguageScanner
+    except:
+        AdvancedLanguageScanner = None
+
+try:
     from performance_analyzer import PerformanceAnalyzer
 except:
     try:
         from src.core.performance_analyzer import PerformanceAnalyzer
     except:
         PerformanceAnalyzer = None
+
+# Disable cross_file_analysis for Python 3.14 (networkx incompatibility)
+ENABLE_CROSS_FILE = False
+try:
+    import networkx
+    ENABLE_CROSS_FILE = True
+except:
+    pass
 
 try:
     from advanced_metrics import AdvancedMetricsCalculator
@@ -73,48 +97,33 @@ class ComprehensiveScanner:
         
     def scan_file(self, file_path: str) -> Dict[str, Any]:
         """Comprehensive scan of single file"""
-        print(f"\n{'='*70}")
-        print(f"🫀 CODEPULSE - COMPREHENSIVE ANALYSIS")
-        print(f"{'='*70}")
-        print(f"\nFile: {file_path}")
-        print(f"Started: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
-        
         self.start_time = time.time()
         
         # 1. Deep Analysis
-        print("⚙️  Running Deep Analysis...")
         deep_engine = DeepAnalysisEngine()
         deep_results = deep_engine.analyze_file(file_path)
         self.results['deep_analysis'] = deep_results
-        print("   ✓ Complete")
         
         # 2. Clone Detection
-        print("⚙️  Running Clone Detection...")
         clone_detector = CloneDetector(min_lines=6)
         clones = clone_detector.detect_clones_in_file(file_path)
         clone_report = clone_detector.get_clone_report()
         self.results['clone_detection'] = clone_report
-        print(f"   ✓ Found {clone_report['total_clones']} clones")
         
         # 3. Code Smells
-        print("⚙️  Running Smell Detection...")
         smell_detector = IntelligentSmellDetector()
         smells = smell_detector.detect_smells(file_path)
         smell_report = smell_detector.get_smell_report()
         self.results['code_smells'] = smell_report
-        print(f"   ✓ Found {smell_report['total_smells']} smells")
         
         # 4. Security Scan
-        print("⚙️  Running Security Scan...")
         security_scanner = AdvancedSecurityScanner()
         security_issues = security_scanner.scan_file(file_path)
         security_report = security_scanner.get_report()
         self.results['security'] = security_report
-        print(f"   ✓ Found {security_report['total_issues']} security issues")
         
         # 5. Performance Analysis
         if PerformanceAnalyzer:
-            print("⚙️  Running Performance Analysis...")
             try:
                 perf_analyzer = PerformanceAnalyzer()
                 perf_issues = perf_analyzer.analyze_file(file_path)
@@ -122,20 +131,17 @@ class ComprehensiveScanner:
                     'total_issues': len(perf_issues),
                     'issues': perf_issues
                 }
-                print(f"   ✓ Found {len(perf_issues)} performance issues")
             except:
-                print("   ⚠ Performance analysis skipped")
+                pass
         
         # 6. Advanced Metrics
         if AdvancedMetricsCalculator:
-            print("⚙️  Calculating Advanced Metrics...")
             try:
                 metrics_calc = AdvancedMetricsCalculator()
                 metrics = metrics_calc.calculate_file_metrics(file_path)
                 self.results['metrics'] = metrics
-                print("   ✓ Metrics calculated")
             except:
-                print("   ⚠ Metrics calculation skipped")
+                pass
         
         self.end_time = time.time()
         
@@ -145,27 +151,88 @@ class ComprehensiveScanner:
         
         return self.results
     
+    def _make_json_serializable(self, obj):
+        """Convert objects to JSON-serializable format"""
+        if isinstance(obj, dict):
+            return {k: self._make_json_serializable(v) for k, v in obj.items()}
+        elif isinstance(obj, list):
+            return [self._make_json_serializable(item) for item in obj]
+        elif isinstance(obj, tuple):
+            return list(obj)
+        elif isinstance(obj, set):
+            return list(obj)
+        elif hasattr(obj, '__dict__'):
+            # Convert dataclass or object to dict
+            return self._make_json_serializable(obj.__dict__)
+        elif str(type(obj)) == "<class 'mappingproxy'>":
+            # Convert mappingproxy to dict
+            return dict(obj)
+        elif hasattr(obj, '__iter__') and not isinstance(obj, (str, bytes)):
+            # Convert other iterables
+            return [self._make_json_serializable(item) for item in obj]
+        else:
+            # Return primitives as-is
+            return obj
+    
     def scan_directory(self, dir_path: str) -> Dict[str, Any]:
-        """Scan all Python files in directory"""
+        """Scan all supported files in directory"""
         print(f"\n{'='*70}")
         print(f"🫀 CODEPULSE - PROJECT SCAN")
         print(f"{'='*70}")
         print(f"\nDirectory: {dir_path}")
         print(f"Started: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
         
-        # Find all Python files
-        python_files = []
+        # Supported file extensions
+        code_extensions = {
+            '.py': 'Python',
+            '.js': 'JavaScript',
+            '.jsx': 'JavaScript',
+            '.ts': 'TypeScript',
+            '.tsx': 'TypeScript',
+            '.php': 'PHP',
+            '.java': 'Java',
+            '.cs': 'C#',
+            '.go': 'Go',
+            '.rb': 'Ruby',
+            '.rs': 'Rust',
+            '.kt': 'Kotlin',
+        }
+        
+        web_extensions = {
+            '.html': 'HTML',
+            '.htm': 'HTML',
+        }
+        
+        data_extensions = {
+            '.json': 'JSON',
+            '.sql': 'SQL',
+        }
+        
+        all_extensions = {**code_extensions, **web_extensions, **data_extensions}
+        
+        # Find all supported files
+        all_files = []
+        file_counts = {}
+        
         for root, dirs, files in os.walk(dir_path):
             # Skip common directories
-            dirs[:] = [d for d in dirs if d not in ['__pycache__', 'venv', '.git', 'node_modules']]
+            dirs[:] = [d for d in dirs if d not in ['__pycache__', 'venv', '.git', 'node_modules', 'vendor', 'target', 'build', 'dist']]
             
             for file in files:
-                if file.endswith('.py'):
-                    python_files.append(os.path.join(root, file))
+                ext = os.path.splitext(file)[1].lower()
+                if ext in all_extensions:
+                    all_files.append(os.path.join(root, file))
+                    lang = all_extensions[ext]
+                    file_counts[lang] = file_counts.get(lang, 0) + 1
         
-        print(f"Found {len(python_files)} Python files\n")
+        # Display file counts
+        print(f"Found {len(all_files)} files:\n")
+        for lang in sorted(file_counts.keys()):
+            icon = self._get_language_icon(lang)
+            print(f"  {icon} {lang:12s}: {file_counts[lang]:3d}")
+        print()
         
-        # Scan each file
+        # Scan files
         all_results = {}
         total_issues = {
             'security': 0,
@@ -174,33 +241,108 @@ class ComprehensiveScanner:
             'performance': 0
         }
         
-        for i, file_path in enumerate(python_files, 1):
-            print(f"[{i}/{len(python_files)}] {os.path.basename(file_path)}")
+        # Group files by type for better progress display
+        python_files = [f for f in all_files if f.endswith('.py')]
+        code_files = [f for f in all_files if os.path.splitext(f)[1] in code_extensions and not f.endswith('.py')]
+        web_files = [f for f in all_files if os.path.splitext(f)[1] in web_extensions]
+        data_files = [f for f in all_files if os.path.splitext(f)[1] in data_extensions]
+        
+        # Scan Python files (full analysis)
+        if python_files:
+            print(f"🐍 Analyzing Python files...")
+            for i, file_path in enumerate(python_files, 1):
+                filename = os.path.basename(file_path)
+                print(f"  [{i}/{len(python_files)}] {filename:40s}", end=" ", flush=True)
+                
+                try:
+                    result = self.scan_file(file_path)
+                    all_results[file_path] = self._make_json_serializable(result)
+                    
+                    total_issues['security'] += result.get('security', {}).get('total_issues', 0)
+                    total_issues['smells'] += result.get('code_smells', {}).get('total_smells', 0)
+                    total_issues['clones'] += result.get('clone_detection', {}).get('total_clones', 0)
+                    total_issues['performance'] += result.get('performance', {}).get('total_issues', 0)
+                    
+                    print("✓")
+                except Exception as e:
+                    print(f"❌")
+            print()
+        
+        # Scan other code files (security only)
+        if code_files and AdvancedLanguageScanner:
+            print(f"💻 Analyzing code files...")
+            lang_scanner = AdvancedLanguageScanner()
             
-            try:
-                result = self.scan_file(file_path)
-                all_results[file_path] = result
+            for i, file_path in enumerate(code_files, 1):
+                filename = os.path.basename(file_path)
+                ext = os.path.splitext(file_path)[1]
+                lang = code_extensions.get(ext, 'Unknown')
                 
-                # Aggregate
-                total_issues['security'] += result.get('security', {}).get('total_issues', 0)
-                total_issues['smells'] += result.get('code_smells', {}).get('total_smells', 0)
-                total_issues['clones'] += result.get('clone_detection', {}).get('total_clones', 0)
-                total_issues['performance'] += result.get('performance', {}).get('total_issues', 0)
+                print(f"  [{i}/{len(code_files)}] [{lang:4s}] {filename:30s}", end=" ", flush=True)
                 
-            except Exception as e:
-                print(f"   ❌ Error: {e}")
-                continue
+                try:
+                    result = lang_scanner.scan_file(file_path)
+                    if 'error' not in result:
+                        all_results[file_path] = self._make_json_serializable(result)
+                        total_issues['security'] += result.get('total_issues', 0)
+                        print("✓")
+                    else:
+                        print("⚠")
+                except Exception as e:
+                    print("❌")
+            print()
+        
+        # Scan web/data files
+        if (web_files or data_files) and MultiFormatScanner:
+            print(f"📄 Analyzing web & data files...")
+            multi_scanner = MultiFormatScanner()
+            
+            for file_list in [web_files, data_files]:
+                for i, file_path in enumerate(file_list, 1):
+                    filename = os.path.basename(file_path)
+                    ext = os.path.splitext(file_path)[1]
+                    
+                    print(f"  [{i}/{len(file_list)}] [{ext[1:]:4s}] {filename:30s}", end=" ", flush=True)
+                    
+                    try:
+                        result = multi_scanner.scan_file(file_path)
+                        all_results[file_path] = self._make_json_serializable(result)
+                        total_issues['security'] += result.get('total_issues', 0)
+                        print("✓")
+                    except Exception as e:
+                        print("❌")
+            print()
         
         # Project summary
         project_summary = {
-            'total_files': len(python_files),
+            'total_files': len(all_files),
             'files_scanned': len(all_results),
+            'file_types': file_counts,
             'total_issues': total_issues,
             'project_score': self._calculate_project_score(all_results),
             'files': all_results
         }
         
         return project_summary
+    
+    def _get_language_icon(self, language: str) -> str:
+        """Get emoji icon for language"""
+        icons = {
+            'Python': '🐍',
+            'JavaScript': '💛',
+            'TypeScript': '💙',
+            'PHP': '🐘',
+            'Java': '☕',
+            'C#': '🔷',
+            'Go': '🔵',
+            'Ruby': '💎',
+            'Rust': '🦀',
+            'Kotlin': '🟣',
+            'HTML': '🌐',
+            'JSON': '📄',
+            'SQL': '💾',
+        }
+        return icons.get(language, '📝')
     
     def _calculate_overall_score(self) -> float:
         """Calculate overall code quality score"""
@@ -257,111 +399,113 @@ class ComprehensiveScanner:
     def print_summary(self):
         """Print beautiful summary report"""
         print(f"\n{'='*70}")
-        print("📊 COMPREHENSIVE ANALYSIS RESULTS")
+        print("📊 ANALYSIS SUMMARY")
         print(f"{'='*70}\n")
         
         # Overall Score
         score = self.results.get('overall_score', 0)
         grade = self._get_grade(score)
-        print(f"Overall Score: {score}/100 ({grade})")
-        print(f"Scan Time: {self.results.get('scan_time', 0)}s\n")
+        
+        # Color-coded score
+        if score >= 80:
+            score_icon = "🟢"
+        elif score >= 60:
+            score_icon = "🟡"
+        else:
+            score_icon = "🔴"
+        
+        print(f"{score_icon} Overall Score: {score}/100 ({grade})")
+        print(f"⏱️  Scan Time: {self.results.get('scan_time', 0)}s\n")
+        
+        # Quick Stats
+        security = self.results.get('security', {})
+        smells = self.results.get('code_smells', {})
+        clones = self.results.get('clone_detection', {})
+        perf = self.results.get('performance', {})
+        
+        print(f"{'─'*70}")
+        print("🎯 ISSUES FOUND")
+        print(f"{'─'*70}")
+        
+        sec_count = security.get('total_issues', 0)
+        smell_count = smells.get('total_smells', 0)
+        clone_count = clones.get('total_clones', 0)
+        perf_count = perf.get('total_issues', 0)
+        
+        print(f"🔒 Security:     {sec_count:3d} issues")
+        print(f"👃 Code Smells:  {smell_count:3d} issues")
+        print(f"🔍 Clones:       {clone_count:3d} duplicates")
+        print(f"⚡ Performance:  {perf_count:3d} issues")
+        print()
+        
+        # Security Details
+        if sec_count > 0:
+            print(f"{'─'*70}")
+            print("🔒 SECURITY BREAKDOWN")
+            print(f"{'─'*70}")
+            by_sev = security.get('by_severity', {})
+            for sev in ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW']:
+                count = by_sev.get(sev, 0)
+                if count > 0:
+                    icon = '🔴' if sev == 'CRITICAL' else '🟠' if sev == 'HIGH' else '🟡' if sev == 'MEDIUM' else '🟢'
+                    print(f"  {icon} {sev:8s}: {count}")
+            print()
+        
+        # Top Issues
+        print(f"{'─'*70}")
+        print("⚠️  TOP 5 PRIORITY ISSUES")
+        print(f"{'─'*70}")
+        
+        top_issues = []
+        
+        # Add critical security
+        if security.get('issues'):
+            for issue in security['issues'][:3]:
+                if issue['severity'] in ['CRITICAL', 'HIGH']:
+                    top_issues.append({
+                        'type': 'SECURITY',
+                        'severity': issue['severity'],
+                        'desc': f"{issue['type']} (Line {issue['line']})",
+                        'fix': issue['recommendation']
+                    })
+        
+        # Add high smells
+        if smells.get('smells'):
+            for smell in smells['smells'][:2]:
+                if smell['severity'] in ['HIGH', 'MEDIUM']:
+                    top_issues.append({
+                        'type': 'SMELL',
+                        'severity': smell['severity'],
+                        'desc': f"{smell['name']} (Line {smell['line']})",
+                        'fix': smell['refactoring']
+                    })
+        
+        for i, issue in enumerate(top_issues[:5], 1):
+            sev_icon = '🔴' if issue['severity'] == 'CRITICAL' else '🟠' if issue['severity'] == 'HIGH' else '🟡'
+            print(f"\n{i}. [{issue['type']}] {issue['desc']}")
+            print(f"   {sev_icon} {issue['severity']}")
+            print(f"   💡 {issue['fix'][:60]}...")
+        
+        if not top_issues:
+            print("\n✅ No critical issues found!")
+        
+        print(f"\n{'='*70}\n")
         
         # Deep Analysis
         if 'deep_analysis' in self.results:
             deep = self.results['deep_analysis']
-            print(f"{'─'*70}")
-            print("🧠 DEEP ANALYSIS")
-            print(f"{'─'*70}")
-            
             cf = deep.get('control_flow_analysis', {})
-            print(f"Control Flow:")
-            print(f"  • Nodes: {cf.get('total_nodes', 0)}")
-            print(f"  • Edges: {cf.get('total_edges', 0)}")
-            print(f"  • Branch Points: {cf.get('branch_points', 0)}")
-            print(f"  • Complexity: {cf.get('cyclomatic_complexity', 0)}")
-            
             if cf.get('issues'):
-                print(f"  Issues:")
-                for issue in cf['issues']:
-                    print(f"    ⚠  {issue['message']}")
-            
-            df = deep.get('data_flow_analysis', {})
-            print(f"\nData Flow:")
-            print(f"  • Variables: {df.get('total_variables', 0)}")
-            print(f"  • Dependencies: {df.get('data_dependencies', 0)}")
-            
-            if df.get('issues'):
-                for issue in df['issues'][:3]:
-                    print(f"    ⚠  {issue['message']}")
-            print()
-        
-        # Security
-        if 'security' in self.results:
-            sec = self.results['security']
-            print(f"{'─'*70}")
-            print("🔒 SECURITY ANALYSIS")
-            print(f"{'─'*70}")
-            print(f"Security Score: {sec.get('security_score', 0)}/100")
-            print(f"Total Issues: {sec.get('total_issues', 0)}\n")
-            
-            by_sev = sec.get('by_severity', {})
-            if any(by_sev.values()):
-                print("By Severity:")
-                for sev in ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW']:
-                    count = by_sev.get(sev, 0)
-                    if count > 0:
-                        icon = '🔴' if sev == 'CRITICAL' else '🟠' if sev == 'HIGH' else '🟡' if sev == 'MEDIUM' else '🟢'
-                        print(f"  {icon} {sev}: {count}")
-            
-            if sec.get('issues'):
-                print(f"\nTop Security Issues:")
-                for issue in sec['issues'][:3]:
-                    print(f"  [{issue['severity']}] {issue['type']}")
-                    print(f"    Line {issue['line']}: {issue['description']}")
-                    print(f"    💡 {issue['recommendation']}")
-            print()
-        
-        # Code Smells
-        if 'code_smells' in self.results:
-            smells = self.results['code_smells']
-            print(f"{'─'*70}")
-            print("👃 CODE SMELLS")
-            print(f"{'─'*70}")
-            print(f"Health Score: {smells.get('code_health_score', 0)}/100")
-            print(f"Total Smells: {smells.get('total_smells', 0)}\n")
-            
-            by_cat = smells.get('by_category', {})
-            if by_cat:
-                print("By Category:")
-                for cat, count in by_cat.items():
-                    print(f"  • {cat}: {count}")
-            
-            if smells.get('smells'):
-                print(f"\nTop Smells:")
-                for smell in smells['smells'][:3]:
-                    print(f"  [{smell['severity']}] {smell['name']} (Line {smell['line']})")
-                    print(f"    💡 {smell['refactoring']}")
-            print()
-        
-        # Clone Detection
-        if 'clone_detection' in self.results:
-            clones = self.results['clone_detection']
-            print(f"{'─'*70}")
-            print("🔍 CLONE DETECTION")
-            print(f"{'─'*70}")
-            print(f"Total Clones: {clones.get('total_clones', 0)}")
-            print(f"Duplicated Lines: {clones.get('total_duplicated_lines', 0)}\n")
-            
-            by_type = clones.get('clones_by_type', {})
-            if by_type:
-                print("By Type:")
-                for type_name, count in by_type.items():
-                    print(f"  • {type_name}: {count}")
-            print()
+                print(f"{'─'*70}")
+                print("🧠 CONTROL FLOW WARNINGS")
+                print(f"{'─'*70}")
+                for issue in cf['issues'][:3]:
+                    print(f"  ⚠️  {issue['message']}")
+                print()
         
         # Recommendations
         print(f"{'─'*70}")
-        print("🎯 PRIORITY RECOMMENDATIONS")
+        print("🎯 RECOMMENDATIONS")
         print(f"{'─'*70}")
         
         recs = self._generate_recommendations()
@@ -438,7 +582,17 @@ def main():
     scanner = ComprehensiveScanner()
     
     if os.path.isfile(target):
+        # Single file scan
+        print(f"\n{'='*70}")
+        print(f"🫀 CODEPULSE - FILE ANALYSIS")
+        print(f"{'='*70}")
+        print(f"\nFile: {target}")
+        print(f"Started: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+        
+        print("⚙️  Running comprehensive analysis...", end=" ", flush=True)
         results = scanner.scan_file(target)
+        print("✓\n")
+        
         scanner.print_summary()
         
         # Save report
@@ -446,24 +600,56 @@ def main():
         scanner.save_report(report_path)
         
     elif os.path.isdir(target):
+        # Directory scan
         results = scanner.scan_directory(target)
         
         print(f"\n{'='*70}")
         print("📊 PROJECT SUMMARY")
         print(f"{'='*70}\n")
-        print(f"Total Files: {results['total_files']}")
-        print(f"Files Scanned: {results['files_scanned']}")
-        print(f"Project Score: {results['project_score']}/100\n")
         
-        print("Total Issues:")
+        score = results['project_score']
+        grade = scanner._get_grade(score)
+        
+        # Color-coded score
+        if score >= 80:
+            score_icon = "🟢"
+        elif score >= 60:
+            score_icon = "🟡"
+        else:
+            score_icon = "🔴"
+        
+        print(f"{score_icon} Project Score: {score}/100 ({grade})")
+        print(f"📁 Files: {results['files_scanned']}/{results['total_files']}\n")
+        
+        print(f"{'─'*70}")
+        print("🎯 TOTAL ISSUES ACROSS PROJECT")
+        print(f"{'─'*70}")
         for issue_type, count in results['total_issues'].items():
-            print(f"  • {issue_type.title()}: {count}")
+            icon = '🔒' if issue_type == 'security' else '👃' if issue_type == 'smells' else '🔍' if issue_type == 'clones' else '⚡'
+            print(f"{icon} {issue_type.title():12s}: {count:4d}")
+        
+        # Priority files
+        print(f"\n{'─'*70}")
+        print("⚠️  FILES NEEDING ATTENTION")
+        print(f"{'─'*70}")
+        
+        file_scores = []
+        for file_path, file_result in results['files'].items():
+            file_score = file_result.get('overall_score', 100)
+            file_scores.append((os.path.basename(file_path), file_score, file_path))
+        
+        file_scores.sort(key=lambda x: x[1])  # Sort by score (lowest first)
+        
+        for i, (filename, score, path) in enumerate(file_scores[:5], 1):
+            icon = "🔴" if score < 60 else "🟡" if score < 80 else "🟢"
+            print(f"{i}. {icon} {filename:30s} {score:5.1f}/100")
         
         # Save report
         report_path = f"project_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
         with open(report_path, 'w') as f:
             json.dump(results, f, indent=2)
-        print(f"\n💾 Report saved to: {report_path}")
+        print(f"\n💾 Detailed report: {report_path}")
+        print(f"{'='*70}\n")
         
     else:
         print(f"Error: {target} is not a file or directory")
