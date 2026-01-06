@@ -208,8 +208,6 @@ MIT License - see [LICENSE](LICENSE) file.
 
 **Author:** Saleh Almqati  
 **GitHub:** [@DeftonesL](https://github.com/DeftonesL)  
-**LinkedIn:** [Saleh Almqati](https://linkedin.com/in/Saleh-almqati)
-
 ---
 
 **CodePulse v0.7.1** - Professional code analysis for serious developers.
