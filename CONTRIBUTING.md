@@ -216,4 +216,3 @@ Git:
 ☐ Descriptive branch name
 ☐ Logical commits
 ☐ Complete PR description
-```
