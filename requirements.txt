@@ -2,16 +2,9 @@
 # =======================
 # Core dependencies for deep code intelligence
 
-# ═══════════════════════════════════════════════════════════════
-# CORE ANALYSIS (Required)
-# ═══════════════════════════════════════════════════════════════
 
-# CLI and Terminal UI
-click>=8.0.0       # Command-line interface
-rich>=13.0.0       # Rich text and beautiful formatting in terminal
-
-# Graph algorithms - Used ONLY for graph data structures
-# All analysis algorithms are custom-built!
+click>=8.0.0       
+rich>=13.0.0       
 networkx>=3.0
 
 
@@ -19,13 +12,10 @@ networkx>=3.0
 # OPTIONAL: AI INTEGRATION
 # ═══════════════════════════════════════════════════════════════
 
-anthropic>=0.18.0  # Claude API (optional enhancement)
-openai>=1.0.0      # OpenAI GPT (optional enhancement)
+anthropic>=0.18.0  
+openai>=1.0.0      
 
-# ═══════════════════════════════════════════════════════════════  
-# DEVELOPMENT DEPENDENCIES
-# ═══════════════════════════════════════════════════════════════
-# Install with: pip install -e .[dev]
+
 
 
 pytest>=8.0.0

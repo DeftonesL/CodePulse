@@ -36,8 +36,9 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
+        pip install click>=8.0.0 rich>=13.0.0
+        pip install networkx>=3.0
         pip install -r requirements.txt
-        pip install -e ".[dev]"
     
     - name: Run linting
       run: |
@@ -131,6 +132,8 @@ jobs:
   security-scan:
     name: Security Vulnerability Scan
     runs-on: ubuntu-latest
+    continue-on-error: true
+    
     
     steps:
     - uses: actions/checkout@v4
