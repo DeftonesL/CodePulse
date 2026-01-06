@@ -1,89 +1,63 @@
 # Contributing to CodePulse
 
-Welcome! CodePulse is built on deep understanding of algorithms and software engineering principles, not wrapping existing tools.
+Welcome! CodePulse is built on deep understanding of algorithms and software engineering principles.
 
-## 🎯 Philosophy
+## 🎯 Project Philosophy
 
-### What Makes CodePulse Different
-
-**We Build, Not Wrap**
+**We Build from Scratch, Not Wrap Existing Tools**
 - Custom algorithms from research papers
-- Deep understanding of complexity
-- Educational code that teaches
-- Performance-conscious implementations
+- Educational code that explains concepts
+- Optimized and thoughtful performance
 
 **Quality Over Speed**
-- Every algorithm documented with complexity
-- Every function has examples
-- Every metric has mathematical foundation
-- Every feature thoroughly tested
+- Every algorithm documented with time complexity
+- Every function includes examples
+- Comprehensive tests for every feature
 
 ---
 
 ## 🚀 Getting Started
 
-### Development Setup
-
 ```bash
-# Fork and clone
+# Fork and Clone
 git clone https://github.com/YOUR_USERNAME/CodePulse.git
 cd CodePulse
 
-# Virtual environment
+# Virtual Environment
 python3 -m venv venv
-source venv/bin/activate
+source venv/bin/activate  # On Windows: venv\Scripts\activate
 
-# Install
+# Installation
 pip install -e .
 pip install -e .[dev]
 
-# Verify
+# Verify Setup
 pytest tests/
-```
-
-### Project Structure
-
-```
-CodePulse/
-├── src/core/          # Analysis engines
-│   ├── deep_analysis.py        # CFG, DFG (543 lines)
-│   ├── clone_detection.py      # 4-type clones (466 lines)
-│   ├── smell_detector.py       # Context-aware (505 lines)
-│   └── ...
-├── src/modules/       # Security, etc.
-├── docs/             # Documentation
-└── tests/            # Test suite
 ```
 
 ---
 
 ## 📝 Code Standards
 
-### Python Style
+### Type Hints Required
 
-**Type Hints Required**
 ```python
-# Good ✅
-def analyze_function(
-    tree: ast.FunctionDef,
-    context: AnalysisContext
-) -> List[Issue]:
+# Correct ✅
+def analyze_function(tree: ast.FunctionDef, context: AnalysisContext) -> List[Issue]:
     """Analyze function for issues."""
     pass
 
-# Bad ❌
+# Wrong ❌
 def analyze_function(tree, context):
     pass
 ```
 
-**Docstrings Required**
+### Docstrings Required with Examples
+
 ```python
 def calculate_complexity(tree: ast.AST) -> ComplexityMetrics:
     """
     Calculate code complexity metrics.
-    
-    Implements McCabe's cyclomatic complexity plus
-    cognitive complexity based on nesting depth.
     
     Time Complexity: O(n)
     Space Complexity: O(d) where d = max depth
@@ -94,256 +68,103 @@ def calculate_complexity(tree: ast.AST) -> ComplexityMetrics:
     Returns:
         ComplexityMetrics with cyclomatic, cognitive scores
         
-    Raises:
-        ValueError: If tree is invalid
-        
     Example:
         >>> tree = ast.parse("def foo(): pass")
-        >>> m = calculate_complexity(tree)
-        >>> m.cyclomatic
+        >>> calculate_complexity(tree).cyclomatic
         1
         
     Reference:
-        McCabe, T. (1976). "A Complexity Measure"
-        IEEE Transactions on Software Engineering
-    """
-    pass
-```
-
-**Complexity Analysis Required**
-```python
-def detect_clones(lines: List[str]) -> List[Clone]:
-    """
-    Detect code clones using rolling hash.
-    
-    Time Complexity: O(n) where n = number of lines
-    Space Complexity: O(n) for hash table
-    
-    Algorithm:
-        1. Create sliding window size W
-        2. Hash each window using rolling hash
-        3. Store hash -> line mapping
-        4. Check collisions for exact match
-        
-    Based on: Rabin-Karp string matching
-    Reference: Cormen et al., Ch. 32
+        McCabe, T. (1976). IEEE Transactions on Software Engineering
     """
     pass
 ```
 
 ---
 
-## 🧪 Testing Standards
+## 🧪 Testing
 
-**Comprehensive Tests**
 ```python
 import pytest
 
 class TestDeepAnalysis:
-    def setup_method(self):
-        self.engine = DeepAnalysisEngine()
-    
     def test_control_flow_simple(self):
         """Test CFG for simple function."""
         code = "def foo():\n    return 1"
         tree = ast.parse(code)
-        self.engine.build_control_flow_graph(tree)
+        engine = DeepAnalysisEngine()
+        engine.build_control_flow_graph(tree)
         
-        assert self.engine.cfg.number_of_nodes() == 2
+        assert engine.cfg.number_of_nodes() == 2
     
     @pytest.mark.parametrize("code,expected", [
         ("def foo(): pass", 1),
         ("def foo():\n if x: pass", 2),
     ])
     def test_complexity_levels(self, code, expected):
-        """Test various complexity levels."""
         tree = ast.parse(code)
-        result = calculate_complexity(tree)
-        assert result >= expected
+        assert calculate_complexity(tree) >= expected
 ```
 
-**Coverage Requirements**
+**Coverage Requirements:**
 - All public functions: 100%
-- All algorithms: Edge cases
-- Performance: Benchmarked
+- Edge cases tested
+- Performance measured
 
 ---
 
-## 🎨 Adding Features
+## ✨ Adding New Features
 
 ### New Analysis Algorithm
 
 **1. Research First**
-```
-Read academic papers
-Understand time/space complexity
-Find reference implementations
-Plan test cases
-```
+- Read research papers
+- Understand time and space complexity
+- Plan test cases
 
-**2. Implement with Documentation**
-```python
-def calculate_cognitive_complexity(tree: ast.AST) -> int:
-    """
-    Calculate cognitive complexity.
-    
-    Cognitive complexity measures how difficult code
-    is to understand (vs cyclomatic = path count).
-    
-    Increments:
-    - if/elif/else: +1
-    - Loops: +1
-    - Nesting: +nesting_level
-    - Recursion: +1
-    - Boolean operators: +1 each
-    
-    Time: O(n), Space: O(d)
-    
-    Reference:
-        Campbell, G. A. (2018)
-        "Cognitive Complexity"
-        SonarSource White Paper
-    """
-    complexity = 0
-    nesting = 0
-    
-    class Visitor(ast.NodeVisitor):
-        def visit_If(self, node):
-            nonlocal complexity, nesting
-            complexity += 1 + nesting
-            nesting += 1
-            self.generic_visit(node)
-            nesting -= 1
-    
-    Visitor().visit(tree)
-    return complexity
-```
-
-**3. Add Tests**
-```python
-def test_cognitive_simple():
-    code = "def foo(): return 1"
-    assert calculate_cognitive_complexity(ast.parse(code)) == 0
-
-def test_cognitive_nested():
-    code = """
-def foo():
-    if x:      # +1
-        if y:  # +1 + 1 (nesting) = 2
-            pass
-"""
-    assert calculate_cognitive_complexity(ast.parse(code)) == 3
-```
-
-**4. Integrate**
-```python
-# In analyzer.py
-metrics['cognitive_complexity'] = calculate_cognitive_complexity(tree)
-```
-
-**5. Document**
-```markdown
-# In docs/ADVANCED_FEATURES.md
-### Cognitive Complexity
-Measures understandability...
-```
-
----
-
-### New Code Smell
-
+**2. Implementation with Documentation**
 ```python
 def detect_feature_envy(tree: ast.AST) -> List[CodeSmell]:
     """
-    Detect Feature Envy smell.
+    Detect Feature Envy code smell.
     
     Method uses another class more than its own.
-    Indicates poor responsibility distribution.
     
     Detection:
     - Count self.* accesses
-    - Count other.* accesses
+    - Count other.* accesses  
     - If other > self + threshold, flag
     
+    Time: O(n), Space: O(1)
     Reference: Fowler, M. "Refactoring" Ch. 3
     """
-    smells = []
-    
-    for node in ast.walk(tree):
-        if isinstance(node, ast.FunctionDef):
-            self_access = 0
-            other_access = defaultdict(int)
-            
-            for child in ast.walk(node):
-                if isinstance(child, ast.Attribute):
-                    if isinstance(child.value, ast.Name):
-                        if child.value.id == 'self':
-                            self_access += 1
-                        else:
-                            other_access[child.value.id] += 1
-            
-            for obj, count in other_access.items():
-                if count > self_access and count > 3:
-                    smells.append(CodeSmell(
-                        name="Feature Envy",
-                        severity="MEDIUM",
-                        description=f"Method '{node.name}' uses '{obj}' more than 'self'",
-                        refactoring_suggestion=f"Move method to '{obj}' class",
-                        code_example=_generate_example(node, obj)
-                    ))
-    
-    return smells
+    # Implementation here
+    pass
 ```
 
----
-
-### New Language Support
-
+**3. Tests**
 ```python
-# src/core/go_scanner.py
-class GoScanner:
-    """Go language scanner."""
-    
-    def __init__(self):
-        self.extensions = ['.go']
-    
-    def scan_file(self, path: str) -> Dict:
-        """
-        Scan Go file.
-        
-        Uses regex for basic analysis.
-        For full AST, would call Go's parser.
-        """
-        with open(path) as f:
-            content = f.read()
-        
-        return {
-            'language': 'Go',
-            'functions': self._extract_functions(content),
-            'structs': self._extract_structs(content),
-            'lines': len(content.split('\n'))
-        }
-    
-    def _extract_functions(self, content: str) -> List[Dict]:
-        pattern = r'func\s+(\w+)\s*\('
-        return [
-            {'name': m.group(1), 'line': content[:m.start()].count('\n') + 1}
-            for m in re.finditer(pattern, content)
-        ]
-
-# Register in scanner.py
-SCANNERS['.go'] = GoScanner
+def test_feature_envy_detection():
+    code = """
+class A:
+    def method(self, b):
+        b.x()
+        b.y()
+        b.z()  # Uses 'b' more than 'self'
+"""
+    smells = detect_feature_envy(ast.parse(code))
+    assert len(smells) > 0
+    assert smells[0].name == "Feature Envy"
 ```
 
 ---
 
 ## 🐛 Bug Reports
 
-### Template
+Use this template:
 
 ```markdown
-**Bug Description**
-Clear, concise description.
+**Description**
+Clear and concise description of the issue
 
 **Steps to Reproduce**
 1. Create file: `example.py`
@@ -364,40 +185,6 @@ def problematic_code():
 - OS: macOS 14.0
 - Python: 3.11.5
 - CodePulse: v0.5.0
-
-**Stack Trace**
-```
-Full error message
-```
-```
-
----
-
-## 💡 Feature Requests
-
-### Template
-
-```markdown
-**Problem**
-What pain point does this solve?
-
-**Solution**
-Proposed implementation approach.
-
-**Algorithm**
-If technical:
-- Algorithm name/type
-- Time/space complexity
-- Reference papers
-
-**Example**
-```python
-# Desired behavior
-result = new_feature()
-```
-
-**Complexity**
-Easy / Medium / Hard
 ```
 
 ---
@@ -409,12 +196,12 @@ Code:
 ☐ PEP 8 compliant
 ☐ Type hints on all functions
 ☐ Docstrings with examples
-☐ Complexity analysis documented
+☐ Time complexity documented
 ☐ No commented code
-☐ No print() (use logging)
+☐ Use logging instead of print()
 
-Testing:
-☐ All tests pass
+Tests:
+☐ All tests passing
 ☐ New tests for new code
 ☐ Coverage >= 75%
 ☐ Edge cases tested
@@ -422,71 +209,59 @@ Testing:
 Documentation:
 ☐ README updated
 ☐ CHANGELOG.md updated
-☐ Algorithm references included
+☐ Algorithm references added
 ☐ Examples provided
 
 Git:
 ☐ Descriptive branch name
 ☐ Logical commits
-☐ PR description complete
-☐ No merge commits
+☐ Complete PR description
 ```
 
 ---
 
 ## 📚 Learning Resources
 
-### Understanding the Code
-
-**Start:**
+**Start Here:**
 1. README.md - Overview
 2. TECHNICAL_ARCHITECTURE.md - Algorithms
-3. scanner.py - Simple module
-4. deep_analysis.py - Complex module
+3. scanner.py - Simple example
+4. deep_analysis.py - Advanced example
 
 **Key Concepts:**
-- Abstract Syntax Trees
+- Abstract Syntax Trees (AST)
 - Graph Theory (CFG, DFG)
 - Complexity Metrics
 - Static Analysis
 
-**Reading:**
-```
-Books:
+**Important Readings:**
 - "Introduction to Algorithms" - Cormen
 - "Refactoring" - Fowler
-- "Code Complete" - McConnell
-
-Papers:
 - McCabe (1976) - Cyclomatic Complexity
-- Halstead (1977) - Software Science
 - Roy (2007) - Clone Detection
-```
 
 ---
 
 ## 🏆 Recognition
 
-### Contributors
-
-Significant contributions earn:
+Major contributions receive:
 - Name in CONTRIBUTORS.md
 - Mention in release notes
 - Credit in documentation
 
-**Significant = **
+**Major Contribution = **
 - New algorithm
-- Performance improvement
-- Language support
+- Significant performance improvement
+- New language support
 - Major bug fix
 
 ---
 
 ## 📞 Contact
 
-**Questions:** GitHub Discussions
-**Bugs:** GitHub Issues
-**Email:** xsll7c@gmail.com
+- **Questions:** GitHub Discussions
+- **Issues:** GitHub Issues
+- **Email:** xsll7c@gmail.com
 
 **Maintainer:**
 - Saleh Almqati
@@ -503,23 +278,23 @@ Significant contributions earn:
 - Help beginners
 
 **Be Educational**
-- Explain reasoning
+- Explain your reasoning
 - Share knowledge
 - Reference sources
 
 **Be Collaborative**
 - Accept criticism
-- Give credit
-- Work together
+- Give credit to others
+- Work with the team
 
 ---
 
 ## 📄 License
 
-Contributions licensed under MIT License.
+Contributions are licensed under MIT License.
 
 ---
 
 **Thank you for contributing!**
 
-*We're not just building a tool - we're building understanding.*
+*We're not just building a tool - we're building deep understanding.*
