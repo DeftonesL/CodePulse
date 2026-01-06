@@ -1,19 +1,3 @@
-"""
-Advanced Code Metrics Calculator
-================================
-
-Calculates sophisticated code quality metrics including:
-- Cyclomatic Complexity
-- Cognitive Complexity
-- Maintainability Index
-- Technical Debt
-- Code Churn
-- Halstead Metrics
-
-Author: Saleh Almqati
-License: MIT
-"""
-
 import ast
 import math
 import re
@@ -22,10 +6,9 @@ from typing import Dict, List, Any, Set
 from dataclasses import dataclass, asdict
 from collections import defaultdict
 
-
 @dataclass
 class HalsteadMetrics:
-    """Halstead complexity metrics"""
+    pass
     n1: int  # Number of distinct operators
     n2: int  # Number of distinct operands
     N1: int  # Total operators
@@ -33,54 +16,45 @@ class HalsteadMetrics:
     
     @property
     def vocabulary(self) -> int:
-        """Program vocabulary"""
         return self.n1 + self.n2
     
     @property
     def length(self) -> int:
-        """Program length"""
         return self.N1 + self.N2
     
     @property
     def calculated_length(self) -> float:
-        """Calculated program length"""
         if self.n1 == 0 or self.n2 == 0:
             return 0
         return self.n1 * math.log2(self.n1) + self.n2 * math.log2(self.n2)
     
     @property
     def volume(self) -> float:
-        """Program volume"""
         if self.vocabulary == 0:
             return 0
         return self.length * math.log2(self.vocabulary)
     
     @property
     def difficulty(self) -> float:
-        """Program difficulty"""
         if self.n2 == 0 or self.N2 == 0:
             return 0
         return (self.n1 / 2) * (self.N2 / self.n2)
     
     @property
     def effort(self) -> float:
-        """Programming effort"""
         return self.difficulty * self.volume
     
     @property
     def time_to_program(self) -> float:
-        """Time required to program (seconds)"""
         return self.effort / 18  # Stroud number
     
     @property
     def bugs_delivered(self) -> float:
-        """Estimated number of bugs"""
         return self.volume / 3000
-
 
 @dataclass
 class ComplexityMetrics:
-    """Comprehensive complexity metrics"""
+    pass
     cyclomatic_complexity: int
     cognitive_complexity: int
     essential_complexity: int
@@ -88,7 +62,6 @@ class ComplexityMetrics:
     average_complexity: float
     
     def get_score(self) -> float:
-        """Calculate complexity score (0-100)"""
         score = 100
         
         # Penalize high cyclomatic complexity
@@ -113,17 +86,15 @@ class ComplexityMetrics:
         
         return max(0, score)
 
-
 @dataclass
 class MaintainabilityMetrics:
-    """Maintainability metrics"""
+    pass
     maintainability_index: float
     comment_ratio: float
     documentation_ratio: float
     test_coverage_estimate: float
     
     def get_grade(self) -> str:
-        """Get maintainability grade"""
         if self.maintainability_index >= 85:
             return "A - Highly Maintainable"
         elif self.maintainability_index >= 70:
@@ -133,14 +104,8 @@ class MaintainabilityMetrics:
         else:
             return "D - Very Difficult to Maintain"
 
-
 class AdvancedMetricsCalculator:
-    """
-    Calculate advanced code quality metrics.
-    
-    This goes beyond basic analysis to provide deep insights
-    into code quality, maintainability, and technical debt.
-    """
+    pass
     
     def __init__(self):
         self.operators = set()
@@ -149,15 +114,6 @@ class AdvancedMetricsCalculator:
         self.operand_count = 0
     
     def analyze_python_file(self, file_path: str) -> Dict[str, Any]:
-        """
-        Perform comprehensive analysis on Python file.
-        
-        Args:
-            file_path: Path to Python file
-            
-        Returns:
-            Dictionary with all metrics
-        """
         try:
             with open(file_path, 'r', encoding='utf-8') as f:
                 code = f.read()
@@ -189,7 +145,6 @@ class AdvancedMetricsCalculator:
             return {'error': str(e)}
     
     def calculate_halstead_metrics(self, tree: ast.AST, code: str) -> HalsteadMetrics:
-        """Calculate Halstead complexity metrics"""
         operators = set()
         operands = set()
         operator_count = 0
@@ -237,7 +192,6 @@ class AdvancedMetricsCalculator:
         )
     
     def calculate_complexity_metrics(self, tree: ast.AST) -> ComplexityMetrics:
-        """Calculate complexity metrics"""
         cyclomatic = self._calculate_cyclomatic_complexity(tree)
         cognitive = self._calculate_cognitive_complexity(tree)
         essential = self._calculate_essential_complexity(tree)
@@ -256,7 +210,6 @@ class AdvancedMetricsCalculator:
         )
     
     def _calculate_cyclomatic_complexity(self, tree: ast.AST) -> int:
-        """Calculate McCabe's cyclomatic complexity"""
         complexity = 1  # Base complexity
         
         decision_points = (
@@ -276,9 +229,6 @@ class AdvancedMetricsCalculator:
         return complexity
     
     def _calculate_cognitive_complexity(self, tree: ast.AST) -> int:
-        """
-        Calculate cognitive complexity (more human-centric than cyclomatic)
-        """
         complexity = 0
         nesting_level = 0
         
@@ -307,7 +257,6 @@ class AdvancedMetricsCalculator:
         return complexity
     
     def _calculate_essential_complexity(self, tree: ast.AST) -> int:
-        """Calculate essential complexity (unstructured flow)"""
         # Simplified: count goto-like patterns
         complexity = 1
         
@@ -323,7 +272,6 @@ class AdvancedMetricsCalculator:
         return complexity
     
     def _calculate_max_nesting_depth(self, tree: ast.AST) -> int:
-        """Calculate maximum nesting depth"""
         max_depth = 0
         
         def visit_node(node, depth=0):
@@ -342,7 +290,6 @@ class AdvancedMetricsCalculator:
     def calculate_maintainability_metrics(
         self, tree: ast.AST, code: str
     ) -> MaintainabilityMetrics:
-        """Calculate maintainability metrics"""
         lines = code.split('\n')
         
         # Count comments
@@ -366,8 +313,6 @@ class AdvancedMetricsCalculator:
         )
         
         # Calculate maintainability index
-        # MI = 171 - 5.2 * ln(V) - 0.23 * G - 16.2 * ln(LOC)
-        # Where V = Halstead Volume, G = Cyclomatic Complexity, LOC = Lines of Code
         
         halstead = self.calculate_halstead_metrics(tree, code)
         complexity = self._calculate_cyclomatic_complexity(tree)
@@ -404,16 +349,8 @@ class AdvancedMetricsCalculator:
         maintainability: MaintainabilityMetrics,
         lines_of_code: int
     ) -> float:
-        """
-        Estimate technical debt in minutes.
-        
-        Based on SQALE methodology:
-        - High complexity = more time to understand and modify
-        - Low maintainability = more refactoring needed
-        """
         debt = 0
         
-        # Complexity debt (minutes per complexity point over threshold)
         if complexity.cyclomatic_complexity > 10:
             debt += (complexity.cyclomatic_complexity - 10) * 5
         
@@ -428,7 +365,6 @@ class AdvancedMetricsCalculator:
         if maintainability.documentation_ratio < 0.5:
             debt += (0.5 - maintainability.documentation_ratio) * 100
         
-        # Size penalty (large files are harder to maintain)
         if lines_of_code > 500:
             debt += (lines_of_code - 500) * 0.1
         
@@ -439,7 +375,6 @@ class AdvancedMetricsCalculator:
         complexity: ComplexityMetrics,
         maintainability: MaintainabilityMetrics
     ) -> float:
-        """Calculate overall quality score (0-100)"""
         # Weighted average
         complexity_score = complexity.get_score()
         maintainability_score = maintainability.maintainability_index
@@ -448,7 +383,6 @@ class AdvancedMetricsCalculator:
         overall = (complexity_score * 0.4) + (maintainability_score * 0.6)
         
         return round(overall, 2)
-
 
 # Example usage
 if __name__ == '__main__':

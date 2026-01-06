@@ -1,16 +1,3 @@
-"""
-CodePulse Comprehensive Analyzer
-===================================
-
-Complete Analysis - Combines all features in one report!
-
-This module integrates Scanner + AI Engine + Security Scanner
-and generates a comprehensive quality report for your project.
-
-Author: Saleh Almqati
-License: MIT
-"""
-
 import os
 import sys
 import json
@@ -41,10 +28,9 @@ from modules.security import SecurityScanner
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-
 @dataclass
 class ComprehensiveReport:
-    """Comprehensive project quality report"""
+    pass
     project_path: str
     scan_date: str
     
@@ -77,29 +63,12 @@ class ComprehensiveReport:
     recommendations: List[str]
     
     def to_dict(self) -> Dict:
-        """Convert to dictionary"""
         return asdict(self)
 
-
 class ComprehensiveAnalyzer:
-    """
-    Comprehensive Analyzer - Combines all tools
-    
-    Performs:
-    1. Project scanning (Scanner)
-    2. Intelligent analysis (AI Engine)
-    3. Security audit (Security Scanner)
-    4. Comprehensive report with final grade
-    """
+    pass
     
     def __init__(self, project_path: str, api_key: Optional[str] = None):
-        """
-        Initialize the comprehensive analyzer.
-        
-        Args:
-            project_path: Path to project to analyze
-            api_key: Optional Anthropic API key for AI analysis
-        """
         self.project_path = Path(project_path).resolve()
         self.api_key = api_key
         
@@ -111,15 +80,6 @@ class ComprehensiveAnalyzer:
         logger.info(f"Initialized comprehensive analyzer for: {self.project_path}")
     
     def analyze(self, max_files_ai: int = 5) -> ComprehensiveReport:
-        """
-        Run comprehensive analysis.
-        
-        Args:
-            max_files_ai: Maximum files to analyze with AI (to save costs)
-            
-        Returns:
-            ComprehensiveReport with all findings
-        """
         logger.info("Starting comprehensive analysis...")
         
         # Step 1: Scan project structure
@@ -142,7 +102,6 @@ class ComprehensiveAnalyzer:
         return report
     
     def _run_security_scan(self, structure) -> Dict:
-        """Run security scan on all files"""
         all_issues = []
         
         for file_meta in structure.files:
@@ -156,7 +115,6 @@ class ComprehensiveAnalyzer:
         return self.security_scanner.generate_report(all_issues)
     
     def _run_ai_analysis(self, structure, max_files: int) -> Dict:
-        """Run AI analysis on selected files"""
         if not self.ai_engine:
             logger.warning("No API key - skipping AI analysis")
             return {
@@ -207,7 +165,6 @@ class ComprehensiveAnalyzer:
         }
     
     def _calculate_grade(self, score: float) -> str:
-        """Calculate letter grade from score"""
         if score >= 90:
             return "A+ Excellent"
         elif score >= 85:
@@ -224,7 +181,6 @@ class ComprehensiveAnalyzer:
             return "D Needs Serious Work"
     
     def _generate_report(self, structure, ai_results, security_results) -> ComprehensiveReport:
-        """Generate the comprehensive report"""
         
         # Count issues by severity
         critical_issues = 0
@@ -333,7 +289,6 @@ class ComprehensiveAnalyzer:
         return report
     
     def print_report(self, report: ComprehensiveReport):
-        """Print beautiful report to console"""
         print("\n" + "="*70)
         print("🫀 CODEPULSE - COMPREHENSIVE ANALYSIS REPORT")
         print("="*70)
@@ -413,15 +368,12 @@ class ComprehensiveAnalyzer:
         print("="*70 + "\n")
     
     def export_report(self, report: ComprehensiveReport, output_path: str):
-        """Export report to JSON file"""
         with open(output_path, 'w', encoding='utf-8') as f:
             json.dump(report.to_dict(), f, indent=2, ensure_ascii=False)
         
         logger.info(f"Report exported to: {output_path}")
 
-
 def main():
-    """Example usage"""
     import sys
     
     if len(sys.argv) < 2:
@@ -457,7 +409,6 @@ def main():
     
     print(f"\nFull report saved to: {output_file}")
     print(f"Reports directory: {os.path.abspath(reports_dir)}")
-
 
 if __name__ == '__main__':
     main()

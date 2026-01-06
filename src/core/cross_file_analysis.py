@@ -1,11 +1,3 @@
-"""
-Cross-File Analysis Engine
-===========================
-
-Analyzes relationships and dependencies across multiple files.
-Detects architectural issues that span file boundaries.
-"""
-
 import ast
 import os
 from pathlib import Path
@@ -14,10 +6,9 @@ from dataclasses import dataclass, field
 from collections import defaultdict
 import networkx as nx
 
-
 @dataclass
 class CrossFileIssue:
-    """Represents an architectural issue across files"""
+    pass
     type: str
     severity: str
     files_involved: List[str]
@@ -26,12 +17,8 @@ class CrossFileIssue:
     suggestion: str
     metrics: Dict[str, Any] = field(default_factory=dict)
 
-
 class ArchitectureAnalyzer:
-    """
-    Analyzes project architecture across multiple files.
-    Detects coupling, cohesion, and layering violations.
-    """
+    pass
     
     def __init__(self):
         self.dependency_graph = nx.DiGraph()
@@ -40,9 +27,6 @@ class ArchitectureAnalyzer:
         self.metrics = {}
         
     def analyze_project(self, root_path: str) -> Dict[str, Any]:
-        """
-        Perform comprehensive cross-file analysis.
-        """
         python_files = self._find_python_files(root_path)
         
         # Build graphs
@@ -75,7 +59,6 @@ class ArchitectureAnalyzer:
         }
     
     def _find_python_files(self, root_path: str) -> List[str]:
-        """Find all Python files in project"""
         files = []
         for root, _, filenames in os.walk(root_path):
             if '__pycache__' in root or 'venv' in root or '.git' in root:
@@ -86,7 +69,6 @@ class ArchitectureAnalyzer:
         return files
     
     def _build_dependency_graph(self, files: List[str]):
-        """Build file-level dependency graph"""
         for file_path in files:
             try:
                 with open(file_path, 'r', encoding='utf-8') as f:
@@ -107,7 +89,6 @@ class ArchitectureAnalyzer:
                 continue
     
     def _build_module_graph(self, files: List[str]):
-        """Build module-level dependency graph"""
         modules = defaultdict(list)
         
         for file_path in files:
@@ -123,7 +104,6 @@ class ArchitectureAnalyzer:
                 self.module_graph.add_edge(src_module, dst_module)
     
     def _extract_imports(self, node: ast.AST) -> List[str]:
-        """Extract imported module names"""
         imports = []
         if isinstance(node, ast.Import):
             for alias in node.names:
@@ -134,7 +114,6 @@ class ArchitectureAnalyzer:
         return imports
     
     def _resolve_import(self, module: str, current_file: str, all_files: List[str]) -> str:
-        """Try to resolve import to actual file"""
         current_dir = os.path.dirname(current_file)
         
         # Relative import
@@ -151,11 +130,9 @@ class ArchitectureAnalyzer:
         return None
     
     def _get_module_name(self, file_path: str) -> str:
-        """Get module name from file path"""
         return os.path.dirname(file_path).split('/')[-1] or 'root'
     
     def _detect_circular_dependencies(self):
-        """Detect circular dependencies between files"""
         try:
             cycles = list(nx.simple_cycles(self.dependency_graph))
             
@@ -173,7 +150,6 @@ class ArchitectureAnalyzer:
             pass
     
     def _detect_god_modules(self):
-        """Detect modules with too many dependencies"""
         for node in self.module_graph.nodes():
             in_degree = self.module_graph.in_degree(node)
             out_degree = self.module_graph.out_degree(node)
@@ -201,8 +177,6 @@ class ArchitectureAnalyzer:
                 ))
     
     def _detect_unstable_dependencies(self):
-        """Detect dependencies on unstable modules"""
-        # Calculate stability: I = Fan-out / (Fan-in + Fan-out)
         stabilities = {}
         
         for node in self.module_graph.nodes():
@@ -213,7 +187,6 @@ class ArchitectureAnalyzer:
                 stability = fan_out / (fan_in + fan_out)
                 stabilities[node] = stability
         
-        # Check for stable modules depending on unstable ones
         for src, dst in self.module_graph.edges():
             src_stability = stabilities.get(src, 0.5)
             dst_stability = stabilities.get(dst, 0.5)
@@ -231,7 +204,6 @@ class ArchitectureAnalyzer:
                 ))
     
     def _detect_feature_clusters(self):
-        """Detect isolated feature clusters that could be modules"""
         try:
             # Find strongly connected components
             components = list(nx.strongly_connected_components(self.dependency_graph))
@@ -258,7 +230,6 @@ class ArchitectureAnalyzer:
             pass
     
     def _calculate_architecture_metrics(self):
-        """Calculate various architecture metrics"""
         # Modularity
         try:
             modularity = nx.algorithms.community.modularity(
@@ -289,7 +260,6 @@ class ArchitectureAnalyzer:
         }
     
     def _calculate_architecture_score(self) -> float:
-        """Calculate overall architecture quality score"""
         score = 100.0
         
         # Penalize based on issues
@@ -313,19 +283,14 @@ class ArchitectureAnalyzer:
         
         return max(0, min(100, score))
 
-
 class CodeDuplicationAnalyzer:
-    """
-    Cross-file code duplication analysis.
-    Finds duplicated code across different files.
-    """
+    pass
     
     def __init__(self, min_lines: int = 6):
         self.min_lines = min_lines
         self.duplications = []
         
     def analyze_duplication(self, files: List[str]) -> Dict[str, Any]:
-        """Find code duplication across files"""
         file_hashes = {}
         
         # Hash code blocks from all files
@@ -365,7 +330,6 @@ class CodeDuplicationAnalyzer:
         }
     
     def _hash_code_blocks(self, lines: List[str]) -> List[Tuple[str, Tuple[int, int]]]:
-        """Hash sliding windows of code"""
         import hashlib
         hashes = []
         
@@ -375,7 +339,6 @@ class CodeDuplicationAnalyzer:
             hashes.append((hash_val, (i, i + self.min_lines)))
         
         return hashes
-
 
 if __name__ == '__main__':
     import sys

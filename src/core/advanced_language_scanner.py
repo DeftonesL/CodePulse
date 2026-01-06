@@ -1,19 +1,11 @@
-"""
-Advanced Multi-Language Security Scanner
-=========================================
-
-Supports: Python, JavaScript, TypeScript, PHP, Java, C#, Go, Ruby, Rust, Kotlin
-"""
-
 import re
 import os
 from typing import Dict, List, Any, Tuple
 from dataclasses import dataclass, asdict
 
-
 @dataclass
 class SecurityIssue:
-    """Security vulnerability found"""
+    pass
     type: str
     severity: str  # CRITICAL, HIGH, MEDIUM, LOW
     category: str
@@ -28,9 +20,8 @@ class SecurityIssue:
     def to_dict(self):
         return asdict(self)
 
-
 class LanguagePatterns:
-    """Security patterns for different languages"""
+    pass
     
     # Common patterns across languages
     COMMON = {
@@ -143,16 +134,14 @@ class LanguagePatterns:
         ],
     }
 
-
 class AdvancedLanguageScanner:
-    """Advanced scanner for multiple programming languages"""
+    pass
     
     def __init__(self):
         self.issues = []
         self.patterns = LanguagePatterns()
         
     def scan_file(self, file_path: str) -> Dict[str, Any]:
-        """Scan file based on extension"""
         ext = os.path.splitext(file_path)[1].lower()
         
         # Determine language
@@ -213,7 +202,6 @@ class AdvancedLanguageScanner:
         }
     
     def _scan_javascript(self, lines: List[str], file_path: str, language: str):
-        """Scan JavaScript/TypeScript"""
         for i, line in enumerate(lines, 1):
             stripped = line.strip()
             
@@ -221,7 +209,6 @@ class AdvancedLanguageScanner:
             if stripped.startswith('//') or stripped.startswith('/*') or stripped.startswith('*'):
                 continue
             
-            # Skip if it's in a string literal (common false positive)
             if "includes('eval" in stripped or '"eval' in stripped or "'eval" in stripped:
                 continue
             
@@ -248,7 +235,6 @@ class AdvancedLanguageScanner:
             # DOM XSS
             for pattern, desc, severity in self.patterns.JAVASCRIPT['dom_xss']:
                 if re.search(pattern, stripped):
-                    # Skip if it's checking for the pattern (not using it)
                     if '.test(' in stripped or 'includes(' in stripped:
                         continue
                     
@@ -282,7 +268,6 @@ class AdvancedLanguageScanner:
                     ))
     
     def _scan_php(self, lines: List[str], file_path: str):
-        """Scan PHP"""
         for i, line in enumerate(lines, 1):
             # Dangerous functions
             for pattern, desc, severity in self.patterns.PHP['dangerous_functions']:
@@ -333,7 +318,6 @@ class AdvancedLanguageScanner:
                     ))
     
     def _scan_java(self, lines: List[str], file_path: str):
-        """Scan Java"""
         for i, line in enumerate(lines, 1):
             # Dangerous functions
             for pattern, desc, severity in self.patterns.JAVA['dangerous_functions']:
@@ -368,7 +352,6 @@ class AdvancedLanguageScanner:
                     ))
     
     def _scan_csharp(self, lines: List[str], file_path: str):
-        """Scan C#"""
         for i, line in enumerate(lines, 1):
             # Dangerous functions
             for pattern, desc, severity in self.patterns.CSHARP['dangerous_functions']:
@@ -403,7 +386,6 @@ class AdvancedLanguageScanner:
                     ))
     
     def _scan_go(self, lines: List[str], file_path: str):
-        """Scan Go"""
         for i, line in enumerate(lines, 1):
             # Dangerous functions
             for pattern, desc, severity in self.patterns.GO['dangerous_functions']:
@@ -438,7 +420,6 @@ class AdvancedLanguageScanner:
                     ))
     
     def _scan_common(self, lines: List[str], file_path: str, language: str):
-        """Scan for common patterns across all languages"""
         for i, line in enumerate(lines, 1):
             # SQL injection
             for pattern, desc in self.patterns.COMMON['sql_injection']:
@@ -475,7 +456,6 @@ class AdvancedLanguageScanner:
                         ))
     
     def _calculate_score(self) -> float:
-        """Calculate security score"""
         score = 100.0
         for issue in self.issues:
             if issue.severity == 'CRITICAL':
@@ -489,19 +469,16 @@ class AdvancedLanguageScanner:
         return max(0, round(score, 1))
     
     def _count_by_severity(self) -> Dict[str, int]:
-        """Count issues by severity"""
         counts = {'CRITICAL': 0, 'HIGH': 0, 'MEDIUM': 0, 'LOW': 0}
         for issue in self.issues:
             counts[issue.severity] += 1
         return counts
     
     def _count_by_category(self) -> Dict[str, int]:
-        """Count issues by category"""
         counts = {}
         for issue in self.issues:
             counts[issue.category] = counts.get(issue.category, 0) + 1
         return counts
-
 
 if __name__ == '__main__':
     import sys

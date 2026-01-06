@@ -1,20 +1,12 @@
-"""
-Multi-Format Security Scanner
-==============================
-
-Scans HTML, JSON, SQL files for security issues and errors.
-"""
-
 import re
 import json
 import os
 from typing import Dict, List, Any
 from dataclasses import dataclass
 
-
 @dataclass
 class SecurityIssue:
-    """Security issue found in file"""
+    pass
     type: str
     severity: str
     description: str
@@ -22,15 +14,13 @@ class SecurityIssue:
     code_snippet: str
     recommendation: str
 
-
 class HTMLScanner:
-    """Scan HTML files for XSS, injection, and security issues"""
+    pass
     
     def __init__(self):
         self.issues = []
         
     def scan(self, file_path: str) -> List[SecurityIssue]:
-        """Scan HTML file"""
         self.issues = []
         
         try:
@@ -51,7 +41,6 @@ class HTMLScanner:
         return self.issues
     
     def _check_inline_scripts(self, lines: List[str], file_path: str):
-        """Check for inline JavaScript (XSS risk)"""
         dangerous_patterns = [
             (r'<script[^>]*>.*?</script>', 'Inline Script', 'HIGH'),
             (r'on\w+\s*=\s*["\']', 'Inline Event Handler', 'HIGH'),
@@ -71,7 +60,6 @@ class HTMLScanner:
                     ))
     
     def _check_dangerous_attributes(self, lines: List[str], file_path: str):
-        """Check for dangerous HTML attributes"""
         dangerous_attrs = [
             (r'innerHTML\s*=', 'innerHTML Assignment', 'Use textContent or sanitize input'),
             (r'document\.write', 'document.write', 'Use modern DOM methods'),
@@ -91,7 +79,6 @@ class HTMLScanner:
                     ))
     
     def _check_external_resources(self, lines: List[str], file_path: str):
-        """Check external resource loading"""
         for i, line in enumerate(lines, 1):
             # HTTP resources (should be HTTPS)
             if re.search(r'(src|href)\s*=\s*["\']http://', line, re.IGNORECASE):
@@ -116,7 +103,6 @@ class HTMLScanner:
                 ))
     
     def _check_form_security(self, lines: List[str], file_path: str):
-        """Check form security"""
         for i, line in enumerate(lines, 1):
             if '<form' in line.lower():
                 # Check for CSRF token
@@ -144,7 +130,6 @@ class HTMLScanner:
                     ))
     
     def _check_iframe_usage(self, lines: List[str], file_path: str):
-        """Check iframe security"""
         for i, line in enumerate(lines, 1):
             if '<iframe' in line.lower():
                 if 'sandbox=' not in line:
@@ -158,7 +143,6 @@ class HTMLScanner:
                     ))
     
     def _check_meta_tags(self, lines: List[str], file_path: str):
-        """Check security-related meta tags"""
         content = '\n'.join(lines)
         
         # Check for CSP
@@ -183,15 +167,13 @@ class HTMLScanner:
                 recommendation='Add X-Frame-Options to prevent clickjacking'
             ))
 
-
 class JSONScanner:
-    """Scan JSON files for security issues and syntax errors"""
+    pass
     
     def __init__(self):
         self.issues = []
     
     def scan(self, file_path: str) -> List[SecurityIssue]:
-        """Scan JSON file"""
         self.issues = []
         
         try:
@@ -221,7 +203,6 @@ class JSONScanner:
         return self.issues
     
     def _check_sensitive_data(self, data: Any, file_path: str):
-        """Check for sensitive data in JSON"""
         sensitive_keys = ['password', 'secret', 'api_key', 'token', 'private_key', 'aws_access']
         
         def check_dict(d, path=''):
@@ -249,7 +230,6 @@ class JSONScanner:
         check_dict(data)
     
     def _check_structure(self, data: Any, file_path: str):
-        """Check JSON structure for common issues"""
         if isinstance(data, dict):
             # Very large objects
             if len(str(data)) > 1000000:  # 1MB
@@ -263,7 +243,6 @@ class JSONScanner:
                 ))
     
     def _check_secrets(self, content: str, file_path: str):
-        """Check for hardcoded secrets in JSON"""
         secret_patterns = [
             (r'AKIA[0-9A-Z]{16}', 'AWS Access Key'),
             (r'sk-[a-zA-Z0-9]{32,}', 'OpenAI API Key'),
@@ -284,15 +263,13 @@ class JSONScanner:
                         recommendation='Remove secret immediately. Use environment variables or secret management.'
                     ))
 
-
 class SQLScanner:
-    """Scan SQL files for security issues and syntax errors"""
+    pass
     
     def __init__(self):
         self.issues = []
     
     def scan(self, file_path: str) -> List[SecurityIssue]:
-        """Scan SQL file"""
         self.issues = []
         
         try:
@@ -310,7 +287,6 @@ class SQLScanner:
         return self.issues
     
     def _check_sql_injection_patterns(self, lines: List[str], file_path: str):
-        """Check for SQL injection patterns"""
         dangerous_patterns = [
             (r'EXEC\s*\(', 'Dynamic SQL Execution'),
             (r'EXECUTE\s+IMMEDIATE', 'Dynamic SQL Execution'),
@@ -332,7 +308,6 @@ class SQLScanner:
                     ))
     
     def _check_dangerous_operations(self, lines: List[str], file_path: str):
-        """Check for dangerous SQL operations"""
         for i, line in enumerate(lines, 1):
             # DROP DATABASE
             if re.search(r'DROP\s+DATABASE', line, re.IGNORECASE):
@@ -368,7 +343,6 @@ class SQLScanner:
                 ))
     
     def _check_authentication(self, lines: List[str], file_path: str):
-        """Check authentication and password handling"""
         for i, line in enumerate(lines, 1):
             # Hardcoded passwords
             if re.search(r'PASSWORD\s*=\s*[\'"][^\'"]+[\'"]', line, re.IGNORECASE):
@@ -394,7 +368,6 @@ class SQLScanner:
                     ))
     
     def _check_permissions(self, lines: List[str], file_path: str):
-        """Check for overly permissive grants"""
         for i, line in enumerate(lines, 1):
             # GRANT ALL
             if re.search(r'GRANT\s+ALL', line, re.IGNORECASE):
@@ -418,9 +391,8 @@ class SQLScanner:
                     recommendation='Grant to specific users/roles, not PUBLIC'
                 ))
 
-
 class MultiFormatScanner:
-    """Unified scanner for multiple file formats"""
+    pass
     
     def __init__(self):
         self.html_scanner = HTMLScanner()
@@ -428,7 +400,6 @@ class MultiFormatScanner:
         self.sql_scanner = SQLScanner()
     
     def scan_file(self, file_path: str) -> Dict[str, Any]:
-        """Scan file based on extension"""
         ext = os.path.splitext(file_path)[1].lower()
         
         issues = []
@@ -479,12 +450,10 @@ class MultiFormatScanner:
         }
     
     def _count_by_severity(self, issues: List[SecurityIssue]) -> Dict[str, int]:
-        """Count issues by severity"""
         counts = {'CRITICAL': 0, 'HIGH': 0, 'MEDIUM': 0, 'LOW': 0}
         for issue in issues:
             counts[issue.severity] = counts.get(issue.severity, 0) + 1
         return counts
-
 
 if __name__ == '__main__':
     import sys

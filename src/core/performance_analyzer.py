@@ -1,23 +1,11 @@
-"""
-Performance Analyzer
-===================
-
-Analyzes code for performance issues and bottlenecks.
-Provides optimization recommendations.
-
-Author: Saleh Almqati  
-License: MIT
-"""
-
 import ast
 import re
 from typing import List, Dict, Any
 from dataclasses import dataclass
 from enum import Enum
 
-
 class PerformanceIssueType(Enum):
-    """Types of performance issues"""
+    pass
     INEFFICIENT_LOOP = "inefficient_loop"
     PREMATURE_OPTIMIZATION = "premature_optimization"
     MEMORY_LEAK = "memory_leak"
@@ -25,10 +13,9 @@ class PerformanceIssueType(Enum):
     EXPENSIVE_OPERATION = "expensive_operation"
     INEFFICIENT_DATA_STRUCTURE = "inefficient_data_structure"
 
-
 @dataclass
 class PerformanceIssue:
-    """Performance issue detected"""
+    pass
     type: PerformanceIssueType
     severity: str
     title: str
@@ -39,24 +26,13 @@ class PerformanceIssue:
     recommendation: str
     code_example: str
 
-
 class PerformanceAnalyzer:
-    """
-    Analyze code for performance issues.
-    
-    Detects:
-    - O(n²) loops
-    - Inefficient data structures
-    - Memory leaks
-    - N+1 queries
-    - Expensive operations in loops
-    """
+    pass
     
     def __init__(self):
         self.issues: List[PerformanceIssue] = []
     
     def analyze_file(self, file_path: str) -> List[PerformanceIssue]:
-        """Analyze file for performance issues"""
         self.issues = []
         
         try:
@@ -76,7 +52,6 @@ class PerformanceAnalyzer:
         return self.issues
     
     def _detect_nested_loops(self, tree: ast.AST, file_path: str):
-        """Detect O(n²) and worse nested loops"""
         
         def check_node(node, depth=0):
             if isinstance(node, (ast.For, ast.While)):
@@ -92,16 +67,7 @@ class PerformanceAnalyzer:
                         line=node.lineno,
                         estimated_impact="High" if depth > 1 else "Medium",
                         recommendation=f"Consider using a more efficient algorithm or data structure. Try hash maps, sets, or preprocessing.",
-                        code_example=f"""# Bad - {complexity}:
-for i in range(n):
-    for j in range(n):
-        # nested operation
-
-# Good - O(n):
-lookup = {{x: i for i, x in enumerate(data)}}
-for item in other_data:
-    if item in lookup:
-        # constant time lookup"""
+                        code_example=f
                     ))
                 
                 # Recurse
@@ -114,13 +80,11 @@ for item in other_data:
         check_node(tree)
     
     def _detect_inefficient_operations(self, tree: ast.AST, file_path: str):
-        """Detect inefficient operations"""
         
         for node in ast.walk(tree):
             # List operations in loops
             if isinstance(node, (ast.For, ast.While)):
                 for child in ast.walk(node):
-                    # append() in loop is OK, but extend() or + is bad
                     if isinstance(child, ast.Call):
                         if isinstance(child.func, ast.Attribute):
                             method = child.func.attr
@@ -136,13 +100,7 @@ for item in other_data:
                                     line=child.lineno,
                                     estimated_impact="Medium",
                                     recommendation="Use join() or list comprehension instead",
-                                    code_example="""# Bad:
-result = ''
-for item in items:
-    result += str(item)
-
-# Good:
-result = ''.join(str(item) for item in items)"""
+                                    code_example=
                                 ))
             
             # List iteration with index
@@ -161,22 +119,11 @@ result = ''.join(str(item) for item in items)"""
                                     line=node.lineno,
                                     estimated_impact="Low",
                                     recommendation="Iterate directly over items or use enumerate() if you need the index",
-                                    code_example="""# Bad:
-for i in range(len(items)):
-    process(items[i])
-
-# Good:
-for item in items:
-    process(item)
-
-# Or with index:
-for i, item in enumerate(items):
-    process(i, item)"""
+                                    code_example=
                                 ))
                                 break
     
     def _detect_memory_issues(self, tree: ast.AST, file_path: str):
-        """Detect potential memory issues"""
         
         for node in ast.walk(tree):
             # Loading entire file into memory
@@ -192,14 +139,7 @@ for i, item in enumerate(items):
                             line=node.lineno,
                             estimated_impact="High",
                             recommendation="Read file in chunks or line by line for large files",
-                            code_example="""# Bad (for large files):
-with open('large_file.txt') as f:
-    data = f.read()
-
-# Good:
-with open('large_file.txt') as f:
-    for line in f:
-        process(line)  # Process one line at a time"""
+                            code_example=
                         ))
             
             # Creating large lists unnecessarily
@@ -216,17 +156,10 @@ with open('large_file.txt') as f:
                         line=node.lineno,
                         estimated_impact="Medium",
                         recommendation="Use generator expression instead of list comprehension",
-                        code_example="""# Bad:
-for item in [expensive_func(x) for x in huge_list]:
-    process(item)
-
-# Good:
-for item in (expensive_func(x) for x in huge_list):
-    process(item)"""
+                        code_example=
                     ))
     
     def _detect_expensive_operations(self, tree: ast.AST, file_path: str):
-        """Detect expensive operations"""
         
         for node in ast.walk(tree):
             # Global lookups in loops
@@ -246,14 +179,7 @@ for item in (expensive_func(x) for x in huge_list):
                                     line=child.lineno,
                                     estimated_impact="Low",
                                     recommendation="Cache the result if it doesn't change",
-                                    code_example=f"""# Bad:
-for i in range(len(items)):  # len() called every iteration
-    process(items[i])
-
-# Good:
-n = len(items)
-for i in range(n):
-    process(items[i])"""
+                                    code_example=f
                                 ))
                                 break
             
@@ -275,28 +201,16 @@ for i in range(n):
                                 line=node.lineno,
                                 estimated_impact="Low",
                                 recommendation="Break down into multiple readable steps. Readability > micro-optimization",
-                                code_example="""# Bad (hard to read):
-def complex():
-    return [x**2 for x in range(10) if x % 2 == 0 and x > 5 and len(str(x)) == 1]
-
-# Good (readable):
-def complex():
-    result = []
-    for x in range(10):
-        if x % 2 == 0 and x > 5:
-            result.append(x**2)
-    return result"""
+                                code_example=
                             ))
     
     def _is_in_loop(self, node: ast.AST, loop: ast.AST) -> bool:
-        """Check if node is inside a loop"""
         for child in ast.walk(loop):
             if child == node:
                 return True
         return False
     
     def _get_parent(self, node: ast.AST, tree: ast.AST) -> ast.AST:
-        """Get parent node (simplified)"""
         for parent in ast.walk(tree):
             for child in ast.iter_child_nodes(parent):
                 if child == node:
@@ -304,14 +218,12 @@ def complex():
         return None
     
     def _count_operations(self, node: ast.AST) -> int:
-        """Count operations in an expression"""
         count = 0
         for _ in ast.walk(node):
             count += 1
         return count
     
     def get_report(self) -> Dict[str, Any]:
-        """Get performance analysis report"""
         return {
             'total_issues': len(self.issues),
             'by_severity': {
@@ -336,7 +248,6 @@ def complex():
                 for i in self.issues
             ]
         }
-
 
 # Example usage
 if __name__ == '__main__':

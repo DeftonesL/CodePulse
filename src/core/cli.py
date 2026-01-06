@@ -1,15 +1,3 @@
-"""
-CodePulse CLI Interface
-==========================
-
-The command-line interface for CodePulse. I used Click and Rich libraries
-to make it look professional. The colored output and progress bars make it
-feel like a real tool!
-
-Author: Saleh Almqati
-License: MIT
-"""
-
 import click
 import sys
 import os
@@ -38,17 +26,10 @@ logging.basicConfig(
     format='%(message)s'
 )
 
-
 @click.group()
 @click.version_option(version='0.1.0')
 def cli():
-    """
-    🛡️  CodePulse - Enterprise AI Testing Framework
-    
-    The Third Eye for Your Codebase
-    """
     pass
-
 
 @cli.command()
 @click.argument('project_path', type=click.Path(exists=True))
@@ -56,13 +37,6 @@ def cli():
 @click.option('--output', '-o', type=click.Path(), help='Output file for results (JSON)')
 @click.option('--verbose', '-v', is_flag=True, help='Verbose output')
 def scan(project_path, depth, output, verbose):
-    """
-    Scan a project and analyze its structure.
-    
-    Example:
-        pulse scan ./my-project
-        pulse scan ./my-project --output=results.json
-    """
     if verbose:
         logging.getLogger().setLevel(logging.INFO)
     
@@ -116,7 +90,6 @@ def scan(project_path, depth, output, verbose):
         console.print(f"[bold red]❌ Error:[/bold red] {str(e)}")
         sys.exit(1)
 
-
 @cli.command()
 @click.argument('project_path', type=click.Path(exists=True))
 @click.option('--api-key', envvar='ANTHROPIC_API_KEY', help='Anthropic API key')
@@ -124,13 +97,6 @@ def scan(project_path, depth, output, verbose):
 @click.option('--max-files', default=10, help='Maximum files to analyze')
 @click.option('--output', '-o', type=click.Path(), help='Output directory for reports')
 def analyze(project_path, api_key, model, max_files, output):
-    """
-    Perform AI-powered analysis of project code.
-    
-    Example:
-        pulse analyze ./my-project
-        pulse analyze ./my-project --max-files=20
-    """
     console.print(Panel.fit(
         "[bold cyan]🤖 Starting AI Analysis[/bold cyan]\n"
         f"Target: {project_path}\n"
@@ -234,19 +200,11 @@ def analyze(project_path, api_key, model, max_files, output):
         traceback.print_exc()
         sys.exit(1)
 
-
 @cli.command()
 @click.argument('project_path', type=click.Path(exists=True))
 @click.option('--output', '-o', type=click.Path(), help='Output file for security report')
 @click.option('--level', default='enterprise', type=click.Choice(['basic', 'standard', 'enterprise']))
 def security(project_path, output, level):
-    """
-    Run comprehensive security audit.
-    
-    Example:
-        pulse security ./my-project
-        pulse security ./my-project --level=enterprise
-    """
     console.print(Panel.fit(
         "[bold red]🔒 Starting Security Audit[/bold red]\n"
         f"Target: {project_path}\n"
@@ -328,26 +286,12 @@ def security(project_path, output, level):
         console.print(f"[bold red]❌ Error:[/bold red] {str(e)}")
         sys.exit(1)
 
-
 @cli.command()
 @click.argument('project_path', type=click.Path(exists=True))
 @click.option('--api-key', envvar='ANTHROPIC_API_KEY', help='Anthropic API key')
 @click.option('--max-files', default=10, help='Maximum files to analyze with AI')
 @click.option('--output', '-o', type=click.Path(), help='Output file for report (JSON)')
 def comprehensive(project_path, api_key, max_files, output):
-    """
-    Run COMPREHENSIVE analysis (All features combined!)
-    
-    This combines:
-    - Project scanning
-    - AI-powered analysis  
-    - Security audit
-    - Final grade and recommendations
-    
-    Example:
-        pulse comprehensive ./my-project
-        pulse comprehensive ./my-project --api-key=your-key
-    """
     console.print(Panel.fit(
         "[bold cyan]COMPREHENSIVE ANALYSIS[/bold cyan]\n"
         f"Target: {project_path}\n"
@@ -391,19 +335,11 @@ def comprehensive(project_path, api_key, max_files, output):
         traceback.print_exc()
         sys.exit(1)
 
-
 @cli.command()
 @click.argument('project_path', type=click.Path(exists=True))
 @click.option('--format', '-f', default='html', type=click.Choice(['html', 'pdf', 'json']))
 @click.option('--output', '-o', type=click.Path(), required=True, help='Output file path')
 def report(project_path, format, output):
-    """
-    Generate comprehensive project report.
-    
-    Example:
-        pulse report ./my-project --format=html --output=report.html
-        pulse report ./my-project --format=pdf --output=report.pdf
-    """
     console.print(Panel.fit(
         "[bold cyan]📊 Generating Report[/bold cyan]\n"
         f"Target: {project_path}\n"
@@ -418,11 +354,8 @@ def report(project_path, format, output):
     console.print("  • AI recommendations")
     console.print("  • Trend analysis")
 
-
 def main():
-    """Entry point for the CLI"""
     cli()
-
 
 if __name__ == '__main__':
     main()

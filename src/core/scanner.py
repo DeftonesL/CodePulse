@@ -1,16 +1,3 @@
-"""
-CodePulse Scanner Module
-============================
-
-Multi-language project scanning with support for Python, JavaScript, TypeScript, and more.
-
-Analyzes project structure, extracts functions, classes, dependencies,
-and builds a comprehensive dependency graph.
-
-Author: Saleh Almqati
-License: MIT
-"""
-
 import ast
 import os
 import pathlib
@@ -27,7 +14,6 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
-
 
 # Language extensions mapping
 LANGUAGE_EXTENSIONS = {
@@ -53,10 +39,9 @@ LANGUAGE_EXTENSIONS = {
     'SQL': ['.sql'],
 }
 
-
 @dataclass
 class FileMetadata:
-    """Metadata for a scanned file"""
+    pass
     path: str
     size: int
     lines: int
@@ -68,13 +53,11 @@ class FileMetadata:
     complexity_score: float = 0.0
     
     def to_dict(self) -> Dict:
-        """Convert to dictionary for JSON serialization"""
         return asdict(self)
-
 
 @dataclass
 class ProjectStructure:
-    """Complete project structure representation"""
+    pass
     root_path: str
     total_files: int = 0
     total_lines: int = 0
@@ -83,7 +66,6 @@ class ProjectStructure:
     dependency_graph: Dict[str, List[str]] = field(default_factory=dict)
     
     def to_dict(self) -> Dict:
-        """Convert to dictionary for JSON serialization"""
         return {
             'root_path': self.root_path,
             'total_files': self.total_files,
@@ -93,17 +75,8 @@ class ProjectStructure:
             'dependency_graph': self.dependency_graph
         }
 
-
 class PulseScanner:
-    """
-    Advanced project scanner with AST-based analysis capabilities.
-    
-    This scanner goes beyond simple file reading by:
-    - Using Abstract Syntax Trees to understand code structure
-    - Building dependency graphs between modules
-    - Calculating complexity metrics
-    - Identifying code patterns and anti-patterns
-    """
+    pass
     
     # Files and directories to exclude from scanning
     EXCLUDE_PATTERNS = {
@@ -165,14 +138,6 @@ class PulseScanner:
     }
     
     def __init__(self, root_path: str, max_depth: int = 10, follow_symlinks: bool = False):
-        """
-        Initialize the scanner.
-        
-        Args:
-            root_path: Root directory to scan
-            max_depth: Maximum directory depth to traverse
-            follow_symlinks: Whether to follow symbolic links
-        """
         self.root_path = pathlib.Path(root_path).resolve()
         self.max_depth = max_depth
         self.follow_symlinks = follow_symlinks
@@ -181,15 +146,6 @@ class PulseScanner:
         logger.info(f"Initialized scanner for: {self.root_path}")
     
     def should_exclude(self, path: pathlib.Path) -> bool:
-        """
-        Determine if a path should be excluded from scanning.
-        
-        Args:
-            path: Path to check
-            
-        Returns:
-            True if path should be excluded
-        """
         for pattern in self.EXCLUDE_PATTERNS:
             if pattern.startswith('*'):
                 # Wildcard pattern
@@ -202,15 +158,6 @@ class PulseScanner:
         return False
     
     def calculate_file_hash(self, file_path: pathlib.Path) -> str:
-        """
-        Calculate SHA-256 hash of a file for integrity verification.
-        
-        Args:
-            file_path: Path to file
-            
-        Returns:
-            Hex digest of file hash
-        """
         sha256_hash = hashlib.sha256()
         try:
             with open(file_path, "rb") as f:
@@ -223,21 +170,6 @@ class PulseScanner:
             return ""
     
     def analyze_python_ast(self, file_path: pathlib.Path) -> Dict[str, Any]:
-        """
-        Perform deep AST analysis on Python files.
-        
-        This method extracts:
-        - Import statements and dependencies
-        - Function definitions with parameters and docstrings
-        - Class definitions with methods
-        - Cyclomatic complexity estimates
-        
-        Args:
-            file_path: Path to Python file
-            
-        Returns:
-            Dictionary containing analysis results
-        """
         result = {
             'imports': [],
             'functions': [],
@@ -273,7 +205,6 @@ class PulseScanner:
                     }
                     result['functions'].append(func_info)
                     
-                    # Simple complexity estimation (count decision points)
                     result['complexity'] += sum(1 for _ in ast.walk(node) 
                                                if isinstance(_, (ast.If, ast.For, ast.While, 
                                                                ast.ExceptHandler, ast.With)))
@@ -308,15 +239,6 @@ class PulseScanner:
         return result
     
     def scan_file(self, file_path: pathlib.Path) -> Optional[FileMetadata]:
-        """
-        Scan a single file and extract metadata.
-        
-        Args:
-            file_path: Path to file
-            
-        Returns:
-            FileMetadata object or None if file couldn't be scanned
-        """
         try:
             # Get file stats
             stat = file_path.stat()
@@ -352,12 +274,6 @@ class PulseScanner:
             return None
     
     def build_dependency_graph(self) -> Dict[str, List[str]]:
-        """
-        Build a dependency graph showing which files import from which.
-        
-        Returns:
-            Dictionary mapping file paths to lists of their dependencies
-        """
         graph = defaultdict(list)
         
         # Create a map of module names to file paths
@@ -371,19 +287,12 @@ class PulseScanner:
         for file_meta in self.structure.files:
             if file_meta.language == 'Python':
                 for import_name in file_meta.imports:
-                    # Check if this import corresponds to a local file
                     if import_name in module_to_file:
                         graph[file_meta.path].append(module_to_file[import_name])
         
         return dict(graph)
     
     def scan(self) -> ProjectStructure:
-        """
-        Perform a complete scan of the project.
-        
-        Returns:
-            ProjectStructure object containing all scan results
-        """
         logger.info(f"Starting scan of {self.root_path}")
         
         # Track statistics
@@ -434,19 +343,11 @@ class PulseScanner:
         return self.structure
     
     def export_json(self, output_path: str) -> None:
-        """
-        Export scan results to JSON file.
-        
-        Args:
-            output_path: Path to output JSON file
-        """
         with open(output_path, 'w', encoding='utf-8') as f:
             json.dump(self.structure.to_dict(), f, indent=2)
         logger.info(f"Exported scan results to {output_path}")
 
-
 def main():
-    """Example usage of the scanner"""
     import sys
     
     if len(sys.argv) < 2:
@@ -470,7 +371,6 @@ def main():
     # Export to JSON
     scanner.export_json('scan_results.json')
     print(f"\n✅ Full results exported to scan_results.json")
-
 
 if __name__ == '__main__':
     main()
