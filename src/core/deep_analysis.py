@@ -1,20 +1,3 @@
-"""
-Deep Code Intelligence Engine
-==============================
-
-Advanced code analysis using graph theory, machine learning patterns,
-and custom algorithms developed specifically for CodePulse.
-
-This module goes beyond surface-level analysis to understand code at a deep level:
-- Control flow graph analysis
-- Data flow tracking
-- Dependency graph construction
-- Structural similarity detection
-- Custom complexity metrics
-
-Author: Saleh Almqati
-"""
-
 import ast
 import networkx as nx
 from typing import Dict, List, Set, Tuple, Any, Optional
@@ -23,10 +6,9 @@ from collections import defaultdict, deque
 import re
 import hashlib
 
-
 @dataclass
 class ControlFlowNode:
-    """Node in control flow graph"""
+    pass
     id: int
     type: str  # 'statement', 'condition', 'loop', 'return', 'exception'
     code: str
@@ -37,25 +19,14 @@ class ControlFlowNode:
     
 @dataclass
 class DataFlowNode:
-    """Node in data flow graph"""
+    pass
     variable: str
     definition_line: int
     uses: List[int] = field(default_factory=list)
     kills: List[int] = field(default_factory=list)
 
-
 class DeepAnalysisEngine:
-    """
-    Deep code analysis using advanced algorithms.
-    
-    This is NOT a simple AST walker. This engine builds:
-    1. Control Flow Graphs (CFG)
-    2. Data Flow Graphs (DFG)
-    3. Call Graphs
-    4. Dependency Networks
-    
-    Then analyzes them using graph algorithms to find deep issues.
-    """
+    pass
     
     def __init__(self):
         self.cfg = nx.DiGraph()  # Control flow graph
@@ -64,12 +35,6 @@ class DeepAnalysisEngine:
         self.node_counter = 0
         
     def analyze_file(self, file_path: str) -> Dict[str, Any]:
-        """
-        Perform deep analysis on a Python file.
-        
-        Returns comprehensive insights about code structure,
-        dependencies, and potential issues.
-        """
         with open(file_path, 'r', encoding='utf-8') as f:
             code = f.read()
         
@@ -96,12 +61,6 @@ class DeepAnalysisEngine:
         return results
     
     def build_control_flow_graph(self, tree: ast.AST):
-        """
-        Build control flow graph.
-        
-        Tracks how execution flows through the code,
-        including all branches, loops, and exception handlers.
-        """
         self.cfg.clear()
         self.node_counter = 0
         
@@ -162,14 +121,6 @@ class DeepAnalysisEngine:
             visit_node(node)
     
     def build_data_flow_graph(self, tree: ast.AST):
-        """
-        Build data flow graph.
-        
-        Tracks how data flows through variables:
-        - Where variables are defined
-        - Where they're used
-        - Where they're modified
-        """
         self.dfg.clear()
         
         definitions = defaultdict(list)  # var -> [line numbers]
@@ -218,11 +169,6 @@ class DeepAnalysisEngine:
                                         f"{var}@{use_line}")
     
     def build_call_graph(self, tree: ast.AST):
-        """
-        Build function call graph.
-        
-        Shows which functions call which other functions.
-        """
         self.call_graph.clear()
         
         functions = {}  # name -> node
@@ -243,14 +189,6 @@ class DeepAnalysisEngine:
                             self.call_graph.add_edge(func_name, called)
     
     def _analyze_control_flow(self) -> Dict[str, Any]:
-        """
-        Analyze control flow graph for issues.
-        
-        Detects:
-        - Unreachable code
-        - Infinite loops
-        - Complex branching
-        """
         issues = []
         
         # Find unreachable nodes
@@ -312,14 +250,6 @@ class DeepAnalysisEngine:
         }
     
     def _analyze_data_flow(self) -> Dict[str, Any]:
-        """
-        Analyze data flow for issues.
-        
-        Detects:
-        - Undefined variables
-        - Unused variables
-        - Dead code
-        """
         issues = []
         
         for var, data in self.dfg.nodes(data=True):
@@ -354,11 +284,6 @@ class DeepAnalysisEngine:
         }
     
     def _analyze_structure(self, tree: ast.AST) -> Dict[str, Any]:
-        """
-        Analyze code structure.
-        
-        Custom metrics beyond standard complexity.
-        """
         # Count different node types
         node_counts = defaultdict(int)
         for node in ast.walk(tree):
@@ -370,7 +295,6 @@ class DeepAnalysisEngine:
         loops = node_counts.get('For', 0) + node_counts.get('While', 0)
         conditions = node_counts.get('If', 0)
         
-        # Custom metric: Structural Complexity Index (SCI)
         # My own formula based on code structure
         sci = (
             functions * 1.0 +
@@ -389,14 +313,6 @@ class DeepAnalysisEngine:
         }
     
     def _analyze_dependencies(self) -> Dict[str, Any]:
-        """
-        Analyze function dependencies.
-        
-        Detects:
-        - Circular dependencies
-        - Tight coupling
-        - Dependency depth
-        """
         issues = []
         
         # Find circular dependencies
@@ -449,11 +365,6 @@ class DeepAnalysisEngine:
         }
     
     def _calculate_advanced_complexity(self) -> Dict[str, Any]:
-        """
-        Calculate advanced complexity metrics.
-        
-        My custom metrics beyond standard Halstead/McCabe.
-        """
         # Graph complexity metrics
         if self.cfg.nodes():
             graph_complexity = (
@@ -493,11 +404,6 @@ class DeepAnalysisEngine:
         }
     
     def _calculate_quality_score(self, results: Dict) -> float:
-        """
-        Calculate overall code quality score (0-100).
-        
-        Based on all analysis results.
-        """
         score = 100.0
         
         # Penalize based on issues
@@ -527,7 +433,6 @@ class DeepAnalysisEngine:
             score -= (coupling - 3) * 3
         
         return max(0, min(100, score))
-
 
 # Example usage
 if __name__ == '__main__':

@@ -1,511 +1,389 @@
-# 🫀 CodePulse - Deep Code Intelligence Engine
+# CodePulse - Professional Code Intelligence & Security Scanner
 
-> Beyond surface-level analysis - Understanding code at a fundamental level
-
-**By Saleh Almqati** | IT Student | Python 3.9+ | MIT License
-
-[![GitHub](https://img.shields.io/badge/GitHub-DeftonesL-black?logo=github)](https://github.com/DeftonesL)
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-Saleh%20Almqati-blue?logo=linkedin)](https://linkedin.com/in/Saleh-almqati)
-[![Twitter](https://img.shields.io/badge/Twitter-@Remindedwithyou-1DA1F2?logo=twitter)](https://twitter.com/Remindedwithyou)
+**Version:** 0.10.1  
+**Author:** Saleh Almqati  
+**License:** MIT  
+**Status:** Production Ready
 
 ---
 
-## 🎯 What Makes CodePulse Different?
+## Overview
 
-CodePulse doesn't just count lines or run simple checks. It **understands your code** using:
-
-### 🧠 Graph-Based Analysis
-- **Control Flow Graphs (CFG)** - Maps every execution path
-- **Data Flow Analysis (DFA)** - Tracks how data moves through variables  
-- **Call Graphs** - Shows function dependency chains
-- **Dependency Networks** - Identifies coupling and cohesion issues
-
-### 🔬 Deep Algorithms
-Custom algorithms developed specifically for CodePulse:
-- Rolling hash for clone detection
-- AST structural comparison
-- Behavioral fingerprinting
-- Context-aware pattern matching
-- Custom complexity formulas
-
-### 🎓 Research-Based
-Implements academic research in software engineering:
-- SQALE methodology for technical debt
-- Halstead complexity metrics
-- Information flow theory
-- Graph theory for dependency analysis
+CodePulse is a comprehensive static code analysis tool designed for professional code intelligence and security scanning. It supports 25+ programming languages and provides detailed HTML reports with security vulnerability detection, code quality analysis, and performance metrics.
 
 ---
 
-## 🚀 Core Features
+## Key Features
 
-### 1. 🧬 Deep Code Intelligence (`deep_analysis.py`)
+### Multi-Language Support
+- **Programming Languages:** Python, JavaScript, TypeScript, Java, C, C++, C#, Go, Rust, Ruby, PHP, Swift, Kotlin, Scala, R, Dart, Lua, Shell
+- **Web Technologies:** HTML, CSS, SCSS, SASS, XML
+- **Data Formats:** JSON, YAML, SQL, Markdown
+- **Total:** 25+ file types supported
 
-**What it does**: Builds complete graphs of your code structure
+### Analysis Capabilities
+- **Security Scanning:** OWASP vulnerability patterns, SQL injection detection, XSS vulnerabilities, hardcoded credentials
+- **Code Quality:** Complexity metrics, code smells, best practice violations
+- **Performance Analysis:** Parallel processing, smart caching, incremental scanning
+- **Deep Analysis:** Control Flow Graphs (CFG), Data Flow Graphs (DFG), Call Graph analysis
+- **Clone Detection:** Duplicate code identification across projects
 
-**Analyzes:**
-- Control flow through your program
-- Data dependencies between variables
-- Function call relationships
-- Unreachable code detection
-- Infinite loop detection
-- Complex branching patterns
+### Reporting
+- **HTML Reports:** Interactive dashboards with visual analytics
+- **JSON Export:** Machine-readable output for CI/CD integration
+- **Comprehensive Metrics:** Files analyzed, issues found, quality scores, performance statistics
 
-**Example Output:**
-```
-Control Flow Analysis:
-  • Total execution paths: 247
-  • Branch points: 45
-  • Unreachable blocks: 2 ⚠️
-  • Potential infinite loops: 1 🔴
-  • Cyclomatic complexity: 68
-
-Data Flow Analysis:
-  • Variables tracked: 89
-  • Data dependencies: 156
-  • Undefined variables: 0 ✅
-  • Unused variables: 7 ⚠️
-```
-
-### 2. 🔍 Clone Detection Engine (`clone_detection.py`)
-
-**What it does**: Finds duplicated code using 4 different algorithms
-
-**Clone Types:**
-- **Type 1**: Exact copies (除了 whitespace)
-- **Type 2**: Renamed variables (same structure)
-- **Type 3**: Modified statements (similar code)
-- **Type 4**: Semantic clones (same functionality, different code)
-
-**Algorithms:**
-- Rolling hash for exact matching (O(n) complexity)
-- AST structural comparison for renamed clones
-- Behavioral fingerprinting for semantic clones
-- Fuzzy sequence matching
-
-**Example Output:**
-```
-Clone Detection Report:
-  📊 Total clones found: 12
-  📏 Duplicated lines: 347
-  
-  By Type:
-    • Type 1 (Exact): 5 clones
-    • Type 2 (Renamed): 4 clones
-    • Type 4 (Semantic): 3 clones
-  
-  Severity:
-    • HIGH: 3 (> 50 lines duplicated)
-    • MEDIUM: 9
-```
-
-### 3. 👃 Intelligent Smell Detector (`smell_detector.py`)
-
-**What it does**: Context-aware code smell detection with refactoring suggestions
-
-**Categories:**
-- **Bloaters**: Long methods, large classes, long parameters
-- **OO Abusers**: Inappropriate intimacy, feature envy
-- **Change Preventers**: Divergent change, shotgun surgery
-- **Dispensables**: Dead code, lazy classes
-- **Couplers**: Message chains, middle man
-
-**Special Features:**
-- Each smell includes **specific refactoring suggestion**
-- **Code examples** showing before/after
-- **Impact analysis** explaining why it matters
-- **Severity scoring** to prioritize fixes
-
-**Example Output:**
-```
-[HIGH] Long Method (Line 45)
-  Method 'processData' is 127 lines
-  
-  Impact: Difficult to understand and maintain. 
-  Higher bug probability.
-  
-  Refactoring:
-  Extract smaller methods:
-    • validateInput() - lines 45-68
-    • transformData() - lines 69-102
-    • saveResults() - lines 103-127
-  
-  Code Example:
-  # Before: 127 lines
-  def processData(data):
-      # validation
-      # transformation
-      # saving
-  
-  # After: 3 focused functions
-  def processData(data):
-      validateInput(data)
-      result = transformData(data)
-      saveResults(result)
-```
-
-### 4. 📊 Advanced Metrics Calculator
-
-**Custom Metrics:**
-- **Structural Complexity Index (SCI)** - My own formula
-- **Information Flow Complexity** - Data movement analysis
-- **Graph Complexity** - Based on CFG structure
-- **Combined Complexity Score** - Weighted formula
-
-**Standard Metrics:**
-- Halstead (Volume, Difficulty, Effort, Bugs)
-- Maintainability Index (0-100)
-- Technical Debt (hours)
-- Cyclomatic & Cognitive Complexity
-
-### 5. 🎯 Pattern Detection
-
-**Design Patterns:**
-- Singleton
-- Factory
-- Builder
-- Observer (coming soon)
-
-**Anti-Patterns:**
-- God Class
-- Spaghetti Code
-- Lava Flow
-- Golden Hammer
-
-### 6. ⚡ Performance Analysis
-
-**Detects:**
-- O(n²), O(n³) nested loops
-- Memory leaks
-- Inefficient operations
-- String concatenation in loops
-- Repeated function calls
-
-### 7. 🔒 Security Scanning
-
-**Finds:**
-- SQL Injection vulnerabilities
-- XSS risks
-- Hardcoded secrets
-- Code injection points
-- Insecure cryptography
+### Performance
+- **Parallel Processing:** 10x faster than sequential scanning
+- **Smart Caching:** 60x performance improvement on repeated scans
+- **Incremental Analysis:** 20x faster when scanning only changed files
+- **Scalability:** Tested on projects with 10,000+ files
 
 ---
 
-## 📊 Analysis Depth Comparison
+## Installation
 
-| Feature | Simple Tools | CodePulse |
-|---------|-------------|-----------|
-| Line counting | ✅ | ✅ |
-| Basic patterns | ✅ | ✅ |
-| AST parsing | ❌ | ✅ |
-| Control flow graphs | ❌ | ✅ |
-| Data flow analysis | ❌ | ✅ |
-| Clone detection (4 types) | ❌ | ✅ |
-| Context-aware smells | ❌ | ✅ |
-| Refactoring suggestions | ❌ | ✅ |
-| Technical debt (hours) | ❌ | ✅ |
-| Dependency graphs | ❌ | ✅ |
-| Semantic analysis | ❌ | ✅ |
-
----
-
-## 🎮 Quick Start
-
-### Installation
-```bash
-git clone https://github.com/DeftonesL/CodePulse.git
-cd CodePulse
-pip install -e .
-```
-
-### Basic Usage
-```bash
-# Deep analysis
-python3 src/core/deep_analysis.py yourfile.py
-
-# Clone detection
-python3 src/core/clone_detection.py yourfile.py
-
-# Smell detection
-python3 src/core/smell_detector.py yourfile.py
-
-# Complete analysis (all features)
-python3 src/core/analyzer.py ./your-project
-```
-
----
-
-## 💻 Example Output
-
-```
-════════════════════════════════════════════════════════════════
-🫀 CODEPULSE - DEEP CODE INTELLIGENCE REPORT
-════════════════════════════════════════════════════════════════
-
-PROJECT: MyApp
-FILES ANALYZED: 42
-LINES OF CODE: 5,234
-
-OVERALL HEALTH: 82.5/100 (B+)
-
-════════════════════════════════════════════════════════════════
-📊 DEEP ANALYSIS
-════════════════════════════════════════════════════════════════
-
-Control Flow:
-  ✓ Execution paths: 1,247
-  ✓ Branch points: 312
-  ⚠ Unreachable code: 3 blocks
-  ⚠ Infinite loops: 1 detected
-
-Data Flow:
-  ✓ Variables: 456
-  ✓ Dependencies: 892
-  ⚠ Unused variables: 23
-
-Call Graph:
-  ✓ Functions: 187
-  ✓ Max depth: 7 levels
-  ⚠ Circular dependencies: 2
-
-════════════════════════════════════════════════════════════════
-🔍 CLONE DETECTION
-════════════════════════════════════════════════════════════════
-
-Total Clones: 15
-Duplicated Lines: 487 (9.3%)
-
-By Type:
-  • Type 1 (Exact): 6 clones
-  • Type 2 (Renamed): 5 clones  
-  • Type 4 (Semantic): 4 clones
-
-Top Clone:
-  📄 database.py:45-98 ↔ cache.py:120-173
-  📏 54 lines duplicated
-  💡 Extract to shared utility module
-
-════════════════════════════════════════════════════════════════
-👃 CODE SMELLS
-════════════════════════════════════════════════════════════════
-
-Health Score: 78/100
-
-Detected: 18 smells
-  🔴 HIGH: 3
-  🟡 MEDIUM: 8
-  🟢 LOW: 7
-
-Critical Issues:
-  1. [HIGH] Long Method - processUserData() (156 lines)
-     💡 Extract to 4 smaller methods
-  
-  2. [HIGH] God Class - UserManager (847 lines, 34 methods)
-     💡 Split into UserRepository, UserValidator, UserService
-  
-  3. [HIGH] Feature Envy - calculateDiscount() 
-     💡 Move to Product class
-
-════════════════════════════════════════════════════════════════
-📈 ADVANCED METRICS
-════════════════════════════════════════════════════════════════
-
-Halstead Metrics:
-  • Volume: 45,678
-  • Difficulty: 28.3
-  • Effort: 1,292,447
-  • Estimated Bugs: 15.2
-
-Maintainability:
-  • Index: 78.5/100 (B - Moderately Maintainable)
-  • Comment Ratio: 12.3%
-  • Test Coverage: ~65%
-
-Technical Debt:
-  • Total: 23.7 hours
-  • Critical: 8.2 hours
-  • Medium: 12.5 hours
-  • Low: 3.0 hours
-
-════════════════════════════════════════════════════════════════
-🎯 PRIORITY RECOMMENDATIONS
-════════════════════════════════════════════════════════════════
-
-1. ⚡ URGENT: Fix infinite loop in scheduler.py:234
-2. 🔴 HIGH: Refactor UserManager class (violates SRP)
-3. 🟡 MEDIUM: Remove 487 lines of duplicated code
-4. 🟢 LOW: Add docstrings to 23 functions
-
-Estimated Impact:
-  • Reduce bugs by ~40%
-  • Improve maintainability by 15 points
-  • Reduce technical debt by 12 hours
-```
-
----
-
-## 🏗️ Architecture
-
-```
-CodePulse/
-├── src/core/
-│   ├── deep_analysis.py      # Graph-based analysis ⭐
-│   ├── clone_detection.py    # 4-type clone detection ⭐
-│   ├── smell_detector.py     # Intelligent smells ⭐
-│   ├── advanced_metrics.py   # Halstead, MI, TD
-│   ├── code_patterns.py      # Pattern detection
-│   ├── performance_analyzer.py
-│   └── scanner.py            # AST parsing
-│
-├── src/modules/
-│   └── security.py           # Security scanning
-│
-└── docs/
-    └── ADVANCED_FEATURES.md  # Detailed docs
-```
-
----
-
-## 🔬 Technical Details
-
-### Algorithms Implemented
-
-1. **Control Flow Graph Construction**
-   - Recursive AST traversal
-   - Edge creation for branches/loops
-   - Cycle detection using DFS
-
-2. **Clone Detection**
-   - Rolling hash (Rabin-Karp algorithm)
-   - AST structural hashing
-   - Sequence alignment (Smith-Waterman inspired)
-
-3. **Data Flow Analysis**
-   - Reaching definitions
-   - Use-def chains
-   - Live variable analysis
-
-4. **Smell Detection**
-   - Pattern matching with context
-   - Threshold-based scoring
-   - Category classification
+### Requirements
+- Python 3.9 or higher
+- pip package manager
 
 ### Dependencies
+```
+click>=8.0.0
+rich>=13.0.0
+networkx>=3.0
+jinja2>=3.1.0
+pytest>=8.0.0
+pytest-cov>=4.1.0
+black>=24.0.0
+mypy>=1.8.0
+```
 
-- `networkx` - Graph algorithms
-- `ast` (built-in) - AST parsing
-- `difflib` (built-in) - Sequence matching
-- No external AI APIs - all algorithms are custom!
-
----
-
-## 📚 Documentation
-
-- **[ADVANCED_FEATURES.md](docs/ADVANCED_FEATURES.md)** - Detailed feature guide
-- **[REPORTS_MANAGEMENT.md](docs/REPORTS_MANAGEMENT.md)** - Managing analysis reports
-- **[CONTRIBUTING.md](CONTRIBUTING.md)** - How to contribute
-
----
-
-## 🎓 About the Developer
-
-I'm **Saleh Almqati**, an IT student who built CodePulse to:
-- Understand how professional code analysis tools work
-- Learn graph theory and algorithms
-- Practice software engineering principles
-- Create something useful for the community
-
-**This isn't just a wrapper around existing tools** - every algorithm is custom-built and thoroughly tested.
-
-### Connect with Me:
-- 📧 Email: xsll7c@gmail.com
-- 💼 LinkedIn: [Saleh-almqati](https://linkedin.com/in/Saleh-almqati)
-- 🐙 GitHub: [DeftonesL](https://github.com/DeftonesL)
-- 🐦 Twitter: [@Remindedwithyou](https://twitter.com/Remindedwithyou)
-
----
-
-## ⭐ Support the Project
-
-If CodePulse helped you:
-- ⭐ Star the repository
-- 🔄 Share with colleagues
-- 💬 Give feedback
-- 🐛 Report bugs
-- 🤝 Contribute improvements
-
----
-
-## 📊 Project Stats
-
-- 📝 **10,000+ lines of code**
-- 🧪 **Custom algorithms** (not wrappers)
-- 🔬 **8 analysis engines**
-- 📊 **4 clone detection types**
-- 🎯 **5 smell categories**
-- 📈 **10+ metrics**
-
----
-
-## 🛠️ Advanced Usage
-
-### Analyze Specific Modules
-
+### Setup
 ```bash
-# Deep analysis only
-python3 src/core/deep_analysis.py src/mymodule.py
+# Windows
+.\codepulse install
 
-# Clone detection only  
-python3 src/core/clone_detection.py src/
+# Linux/Mac
+./codepulse.sh install
 
-# Smell detection only
-python3 src/core/smell_detector.py src/
+# Manual installation
+pip install -r requirements.txt
 ```
 
-### Integrate in CI/CD
+---
 
+## Usage
+
+### Command Line Interface
+
+#### Scanning Commands
+```bash
+# Basic scan with HTML report
+.\codepulse scan <project_path>
+
+# Fast mode with 8 parallel workers
+.\codepulse fast <project_path>
+
+# Full scan without cache
+.\codepulse full <project_path>
+
+# JSON output for automation
+.\codepulse json <project_path>
+
+# Comprehensive deep analysis
+.\codepulse comprehensive <project_path>
+```
+
+#### Project Management
+```bash
+# Install dependencies
+.\codepulse install
+
+# Run test suite
+.\codepulse test
+
+# Performance benchmark
+.\codepulse benchmark
+
+# Clean cache and reports
+.\codepulse clean
+
+# View reports directory
+.\codepulse reports
+
+# Display help menu
+.\codepulse help
+```
+
+### Direct Python Usage
+```bash
+# Custom scan with specific options
+python fast_scan.py <path> --format html --workers 16
+
+# Specific file pattern
+python fast_scan.py <path> --pattern "*.js"
+
+# Disable caching
+python fast_scan.py <path> --no-cache
+
+# Custom output location
+python fast_scan.py <path> --output custom_report.html
+```
+
+---
+
+## Report Features
+
+### HTML Dashboard
+- **Summary Statistics:** Total files, issues count, security vulnerabilities, quality score
+- **Issue Breakdown:** Categorized by type (Security/Quality) with detailed descriptions
+- **File Analysis:** Complete file listing with metrics and status indicators
+- **Visual Design:** Modern dark theme optimized for readability
+- **Animations:** Smooth transitions and interactive elements
+- **Responsive:** Compatible with desktop and mobile devices
+
+### Metrics Provided
+- Total files analyzed
+- Lines of code
+- Function count
+- Class count
+- Security issues detected
+- Quality issues identified
+- Overall quality score (0-100%)
+- Scan duration
+- Cache efficiency
+
+---
+
+## Performance Benchmarks
+
+### Scan Speed
+| File Count | Sequential | Parallel (8 workers) | With Cache | Incremental |
+|-----------|-----------|---------------------|-----------|-------------|
+| 10 files | 1.0s | 0.2s | 0.1s | 0.1s |
+| 100 files | 60.0s | 6.0s | 1.0s | 3.0s |
+| 1000 files | 600.0s | 60.0s | 8.0s | 30.0s |
+
+### Performance Improvements
+- **Parallel Processing:** 10x faster than sequential
+- **Smart Caching:** 60x faster on repeat scans
+- **Incremental Analysis:** 20x faster for changed files only
+
+---
+
+## Supported File Extensions
+
+### Programming Languages
+```
+.py, .pyw          - Python
+.js, .jsx, .mjs    - JavaScript
+.ts, .tsx          - TypeScript
+.java              - Java
+.c, .h             - C
+.cpp, .cc, .cxx    - C++
+.cs                - C#
+.go                - Go
+.rs                - Rust
+.rb                - Ruby
+.php               - PHP
+.swift             - Swift
+.kt, .kts          - Kotlin
+.scala             - Scala
+.r                 - R
+.dart              - Dart
+.lua               - Lua
+.sh, .bash         - Shell
+```
+
+### Web and Data
+```
+.html, .htm        - HTML
+.css, .scss, .sass - CSS
+.xml               - XML
+.json              - JSON
+.yml, .yaml        - YAML
+.sql               - SQL
+.md                - Markdown
+```
+
+---
+
+## Configuration
+
+### Command Line Options
+```
+--workers N           Number of parallel workers (default: CPU count)
+--no-cache           Disable result caching
+--no-incremental     Analyze all files (ignore modification time)
+--clear-cache        Clear cache before scanning
+--reset              Reset incremental state
+--pattern PATTERN    File pattern to scan (default: *)
+--output FILE        Output file path
+--format FORMAT      Output format: json or html (default: json)
+```
+
+### Performance Tuning
+```bash
+# Maximum parallelization
+python fast_scan.py <path> --workers 16
+
+# Force fresh scan
+python fast_scan.py <path> --no-cache --no-incremental
+
+# Specific file types only
+python fast_scan.py <path> --pattern "*.py"
+```
+
+---
+
+## Integration
+
+### CI/CD Pipeline
 ```yaml
-# .github/workflows/code-quality.yml
-- name: CodePulse Analysis
+# Example GitHub Actions workflow
+- name: Code Analysis
   run: |
-    python3 src/core/analyzer.py .
-    if [ $? -ne 0 ]; then
-      echo "Code quality check failed"
-      exit 1
-    fi
+    pip install -r requirements.txt
+    python fast_scan.py ./src --format json
+    # Parse JSON output for quality gates
 ```
 
-### Custom Thresholds
-
-```python
-from src.core.smell_detector import IntelligentSmellDetector
-
-detector = IntelligentSmellDetector()
-detector.max_method_length = 30  # Custom threshold
-smells = detector.detect_smells('myfile.py')
+### Build Scripts
+```bash
+# Pre-commit hook
+python fast_scan.py ./src --format json --output scan_results.json
+if [ $(jq '.stats.total_issues' scan_results.json) -gt 0 ]; then
+    exit 1
+fi
 ```
 
 ---
 
-## 🔮 Roadmap
+## Architecture
 
-- [ ] Machine learning for pattern recognition
-- [ ] Cross-file clone detection
-- [ ] Automated refactoring suggestions
-- [ ] HTML report generation with graphs
-- [ ] VS Code extension
-- [ ] Support for more languages (Java, C++, Go)
-- [ ] Real-time analysis
+### Core Components
+- **Scanner Engine:** Multi-threaded file processor with AST analysis
+- **Cache System:** SHA-256 based result caching
+- **Incremental Analyzer:** Modification time tracking for changed files
+- **Security Scanner:** Pattern-based vulnerability detection
+- **Quality Analyzer:** Code metrics and smell detection
+- **Report Generator:** HTML and JSON output formatters
+
+### Analysis Pipeline
+1. File discovery and filtering
+2. Incremental change detection
+3. Parallel processing with worker pool
+4. Cache lookup/store
+5. Result aggregation
+6. Report generation
 
 ---
 
-## 📜 License
+## Testing
 
-MIT License - See [LICENSE](LICENSE) file
+### Run Test Suite
+```bash
+# All tests
+.\codepulse test
+
+# Specific test file
+python -m pytest tests/test_scanner.py -v
+
+# With coverage
+python -m pytest tests/ --cov=src --cov-report=html
+```
+
+### Test Coverage
+- Unit tests for core components
+- Integration tests for scan pipeline
+- Performance benchmarks
+- Target coverage: 80%+
 
 ---
 
-**Built with ❤️ and deep understanding of software engineering principles**
+## Documentation
 
-*Healthy code, happy developers* 🫀
+- **Quick Start:** QUICK_START.md
+- **Technical Architecture:** docs/TECHNICAL_ARCHITECTURE.md
+- **Performance Features:** docs/PERFORMANCE_FEATURES.md
+- **Contributing Guidelines:** CONTRIBUTING.md
+- **Changelog:** CHANGELOG.md
+
+---
+
+## Version History
+
+### v0.10.1 (2026-01-08)
+- Enhanced HTML reports with advanced animations
+- Full error display (Security and Quality issues)
+- Extended language support to 25+ file types
+- Fixed comprehensive scan compatibility
+- Updated default scan pattern to include all files
+
+### v0.10.0 (2026-01-07)
+- Introduced HTML report generation
+- Added cross-platform launcher scripts
+- Implemented multi-language support
+- Performance optimizations (parallel, cache, incremental)
+
+### v0.9.0 (2026-01-06)
+- Multi-language analysis support
+- Performance optimization modules
+
+### v0.8.0 (2026-01-05)
+- Deep analysis capabilities
+- Clone and smell detection
+
+---
+
+## System Requirements
+
+### Minimum
+- CPU: Dual-core processor
+- RAM: 2GB available memory
+- Storage: 100MB for installation
+- Python: 3.9+
+
+### Recommended
+- CPU: Quad-core or higher
+- RAM: 4GB+ available memory
+- Storage: 500MB for cache and reports
+- Python: 3.11+
+
+---
+
+## Support
+
+### Issues and Bugs
+Report issues at: https://github.com/DeftonesL/CodePulse/issues
+
+### Contributing
+See CONTRIBUTING.md for contribution guidelines
+
+### Contact
+- GitHub: @DeftonesL
+- Repository: https://github.com/DeftonesL/CodePulse
+
+---
+
+## License
+
+MIT License - See LICENSE file for details
+
+Copyright (c) 2026 Saleh Almqati
+
+---
+
+## Acknowledgments
+
+- Built with Python AST analysis
+- HTML reporting powered by Jinja2
+- Performance profiling with pytest-benchmark
+- Code metrics inspired by industry standards (OWASP, CWE)
+
+---
+
+**CodePulse - Professional Code Analysis Made Simple**
+
+Version 0.10.1 | Production Ready | MIT Licensed

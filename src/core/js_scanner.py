@@ -1,23 +1,9 @@
-"""
-JavaScript/TypeScript Scanner
-==============================
-
-Analyzes JavaScript and TypeScript files for CodePulse.
-
-Since we don't have a full AST parser for JS/TS in Python,
-we use regex patterns and basic parsing to extract useful info.
-
-Author: Saleh Almqati
-License: MIT
-"""
-
 import re
 from typing import Dict, List, Any
 from pathlib import Path
 
-
 class JavaScriptScanner:
-    """Scanner for JavaScript and TypeScript files"""
+    pass
     
     def __init__(self):
         # Common patterns for JS/TS
@@ -37,15 +23,6 @@ class JavaScriptScanner:
         }
     
     def scan_file(self, file_path: str) -> Dict[str, Any]:
-        """
-        Scan a JavaScript/TypeScript file.
-        
-        Args:
-            file_path: Path to the file
-            
-        Returns:
-            Dictionary with file metadata
-        """
         try:
             with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
                 content = f.read()
@@ -94,7 +71,6 @@ class JavaScriptScanner:
             }
     
     def _count_code_lines(self, lines: List[str]) -> int:
-        """Count non-empty, non-comment lines"""
         code_lines = 0
         in_multiline_comment = False
         
@@ -124,7 +100,6 @@ class JavaScriptScanner:
         return code_lines
     
     def _extract_imports(self, content: str) -> List[str]:
-        """Extract import statements"""
         imports = []
         
         # ES6 imports
@@ -138,7 +113,6 @@ class JavaScriptScanner:
         return list(set(imports))  # Remove duplicates
     
     def _extract_functions(self, content: str) -> List[Dict[str, str]]:
-        """Extract function definitions"""
         functions = []
         
         # Find all function definitions
@@ -154,7 +128,6 @@ class JavaScriptScanner:
         return functions
     
     def _extract_classes(self, content: str) -> List[str]:
-        """Extract class definitions"""
         classes = []
         
         for match in self.patterns['class'].finditer(content):
@@ -163,7 +136,6 @@ class JavaScriptScanner:
         return classes
     
     def _extract_exports(self, content: str) -> List[str]:
-        """Extract exported items"""
         exports = []
         
         for match in self.patterns['export'].finditer(content):
@@ -172,7 +144,6 @@ class JavaScriptScanner:
         return exports
     
     def _calculate_complexity(self, content: str) -> int:
-        """Calculate cyclomatic complexity (simplified)"""
         complexity = 1  # Base complexity
         
         # Keywords that add to complexity
@@ -187,7 +158,6 @@ class JavaScriptScanner:
         return complexity
     
     def _detect_file_type(self, file_path: str, content: str) -> str:
-        """Detect the type of JS/TS file"""
         path = Path(file_path)
         
         # React components
@@ -214,20 +184,9 @@ class JavaScriptScanner:
         # Generic
         return 'JavaScript Module'
 
-
 def scan_javascript_file(file_path: str) -> Dict[str, Any]:
-    """
-    Convenience function to scan a JavaScript/TypeScript file.
-    
-    Args:
-        file_path: Path to the file
-        
-    Returns:
-        Dictionary with file metadata
-    """
     scanner = JavaScriptScanner()
     return scanner.scan_file(file_path)
-
 
 # Example usage
 if __name__ == '__main__':

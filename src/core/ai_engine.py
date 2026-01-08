@@ -1,17 +1,3 @@
-"""
-CodePulse AI Engine
-======================
-
-AI-powered code analysis using Claude API. This was the most exciting part to build!
-It sends code to the AI and gets back intelligent suggestions.
-
-The AI can spot issues I might miss and suggest improvements. It's like having
-a senior developer review your code (well, almost!).
-
-Author: Saleh Almqati
-License: MIT
-"""
-
 import os
 import json
 import logging
@@ -21,18 +7,16 @@ from enum import Enum
 
 logger = logging.getLogger(__name__)
 
-
 class Severity(Enum):
-    """Issue severity levels"""
+    pass
     CRITICAL = "critical"
     HIGH = "high"
     MEDIUM = "medium"
     LOW = "low"
     INFO = "info"
 
-
 class IssueCategory(Enum):
-    """Categories of code issues"""
+    pass
     SECURITY = "security"
     PERFORMANCE = "performance"
     LOGIC = "logic"
@@ -40,10 +24,9 @@ class IssueCategory(Enum):
     TESTING = "testing"
     DOCUMENTATION = "documentation"
 
-
 @dataclass
 class CodeIssue:
-    """Represents an issue found in the code"""
+    pass
     file_path: str
     line_number: int
     severity: Severity
@@ -54,16 +37,14 @@ class CodeIssue:
     code_snippet: Optional[str] = None
     
     def to_dict(self) -> Dict:
-        """Convert to dictionary for JSON serialization"""
         data = asdict(self)
         data['severity'] = self.severity.value
         data['category'] = self.category.value
         return data
 
-
 @dataclass
 class AnalysisResult:
-    """Result of AI code analysis"""
+    pass
     file_path: str
     overall_score: float  # 0-100
     issues: List[CodeIssue]
@@ -72,7 +53,6 @@ class AnalysisResult:
     complexity_assessment: str
     
     def to_dict(self) -> Dict:
-        """Convert to dictionary"""
         return {
             'file_path': self.file_path,
             'overall_score': self.overall_score,
@@ -82,27 +62,10 @@ class AnalysisResult:
             'complexity_assessment': self.complexity_assessment
         }
 
-
 class AIEngine:
-    """
-    AI-powered code analysis engine using LLMs.
-    
-    This engine provides intelligent code review by:
-    - Understanding code context and intent
-    - Identifying subtle bugs and edge cases
-    - Suggesting performance optimizations
-    - Recommending best practices
-    - Predicting potential issues before they occur
-    """
+    pass
     
     def __init__(self, api_key: Optional[str] = None, model: str = "claude-sonnet-4"):
-        """
-        Initialize the AI engine.
-        
-        Args:
-            api_key: API key for the LLM provider (or from environment)
-            model: Model identifier to use
-        """
         self.api_key = api_key or os.getenv('ANTHROPIC_API_KEY')
         self.model = model
         
@@ -112,82 +75,10 @@ class AIEngine:
             logger.info(f"Initialized AI engine with model: {model}")
     
     def _build_analysis_prompt(self, code: str, file_path: str, context: Dict[str, Any]) -> str:
-        """
-        Build a comprehensive prompt for code analysis.
-        
-        Args:
-            code: Source code to analyze
-            file_path: Path to the file
-            context: Additional context (imports, dependencies, etc.)
-            
-        Returns:
-            Formatted prompt string
-        """
-        prompt = f"""You are an expert code reviewer and software architect performing a comprehensive analysis of the following code.
-
-**File:** `{file_path}`
-
-**Code:**
-```python
-{code}
-```
-
-**Context:**
-- Imports: {', '.join(context.get('imports', []))}
-- Functions: {len(context.get('functions', []))}
-- Classes: {len(context.get('classes', []))}
-- Complexity Score: {context.get('complexity', 0):.1f}/100
-
-Please analyze this code thoroughly and provide:
-
-1. **Critical Issues**: Security vulnerabilities, logic errors, or bugs that could cause failures
-2. **Performance Issues**: Inefficiencies, bottlenecks, or optimization opportunities
-3. **Code Quality**: Style issues, maintainability concerns, or best practice violations
-4. **Testing Gaps**: Missing tests, edge cases not covered, or test improvements needed
-5. **Overall Assessment**: Strengths of the code and a quality score (0-100)
-
-For each issue, provide:
-- Severity (critical/high/medium/low)
-- Category (security/performance/logic/style/testing)
-- Line number (if applicable)
-- Clear description of the problem
-- Specific suggestion for improvement
-- Example code if helpful
-
-Focus on actionable, specific feedback that helps improve the code. Be constructive and explain the "why" behind your recommendations.
-
-Format your response as JSON with this structure:
-{{
-    "overall_score": 85,
-    "issues": [
-        {{
-            "line_number": 42,
-            "severity": "high",
-            "category": "security",
-            "title": "Brief title",
-            "description": "Detailed description",
-            "suggestion": "How to fix it"
-        }}
-    ],
-    "suggestions": ["General improvement suggestions"],
-    "strengths": ["What the code does well"],
-    "complexity_assessment": "Assessment of code complexity"
-}}
-"""
+        prompt = f
         return prompt
     
     def _call_llm(self, prompt: str) -> str:
-        """
-        Make API call to the LLM.
-        
-        Args:
-            prompt: The prompt to send
-            
-        Returns:
-            LLM response as string
-        """
-        # This is a placeholder for actual API integration
-        # In production, this would call Anthropic's Claude API
         
         if not self.api_key:
             logger.warning("API key not available. Returning mock response.")
@@ -197,11 +88,9 @@ Format your response as JSON with this structure:
             # TODO: Implement actual API call
             # Example structure:
             # import anthropic
-            # client = anthropic.Anthropic(api_key=self.api_key)
             # response = client.messages.create(
             #     model=self.model,
             #     max_tokens=4096,
-            #     messages=[{"role": "user", "content": prompt}]
             # )
             # return response.content[0].text
             
@@ -213,12 +102,6 @@ Format your response as JSON with this structure:
             return self._get_mock_response()
     
     def _get_mock_response(self) -> str:
-        """
-        Generate a mock response for testing without API key.
-        
-        Returns:
-            Mock JSON response
-        """
         mock_response = {
             "overall_score": 78,
             "issues": [
@@ -265,17 +148,6 @@ Format your response as JSON with this structure:
         return json.dumps(mock_response, indent=2)
     
     def analyze_code(self, code: str, file_path: str, context: Dict[str, Any]) -> AnalysisResult:
-        """
-        Perform AI-powered analysis of code.
-        
-        Args:
-            code: Source code to analyze
-            file_path: Path to the file
-            context: Additional context about the code
-            
-        Returns:
-            AnalysisResult object with findings and recommendations
-        """
         logger.info(f"Analyzing {file_path} with AI engine...")
         
         # Build the analysis prompt
@@ -332,16 +204,6 @@ Format your response as JSON with this structure:
         return result
     
     def analyze_project(self, scan_results: Dict[str, Any], max_files: int = 10) -> List[AnalysisResult]:
-        """
-        Analyze multiple files from a project scan.
-        
-        Args:
-            scan_results: Results from scanner
-            max_files: Maximum number of files to analyze (for cost control)
-            
-        Returns:
-            List of AnalysisResult objects
-        """
         results = []
         analyzed_count = 0
         
@@ -379,9 +241,7 @@ Format your response as JSON with this structure:
         logger.info(f"Analyzed {analyzed_count} files")
         return results
 
-
 def main():
-    """Example usage of the AI engine"""
     # Example code to analyze
     example_code = '''
 def calculate_total(items):
@@ -432,7 +292,6 @@ def get_user_data(user_id):
     print(f"\n💡 Suggestions:")
     for suggestion in result.suggestions:
         print(f"  • {suggestion}")
-
 
 if __name__ == '__main__':
     main()

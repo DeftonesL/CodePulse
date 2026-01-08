@@ -1,18 +1,3 @@
-"""
-Code Clone Detection Engine
-============================
-
-Detects code duplication using advanced algorithms:
-- Token-based comparison
-- AST similarity
-- Structural hashing
-- Fuzzy matching
-
-This is a custom implementation, not using any existing clone detection tools.
-
-Author: Saleh Almqati
-"""
-
 import ast
 import difflib
 from typing import List, Dict, Set, Tuple, Any
@@ -20,10 +5,9 @@ from dataclasses import dataclass
 from collections import defaultdict
 import hashlib
 
-
 @dataclass
 class CodeClone:
-    """Represents a code clone"""
+    pass
     type: str  # Type 1, 2, 3, or 4
     file1: str
     file2: str
@@ -33,17 +17,8 @@ class CodeClone:
     size: int  # Lines of code
     severity: str
 
-
 class CloneDetector:
-    """
-    Advanced code clone detection.
-    
-    Detects 4 types of clones:
-    - Type 1: Exact copies (除了 whitespace/comments)
-    - Type 2: Renamed identifiers
-    - Type 3: Modified statements
-    - Type 4: Semantic clones (same functionality, different code)
-    """
+    pass
     
     def __init__(self, min_lines: int = 10):  # Increased from 6
         self.min_lines = min_lines
@@ -51,9 +26,6 @@ class CloneDetector:
         self.min_same_file_lines = 15  # Higher threshold for same-file clones
         
     def detect_clones_in_file(self, file_path: str) -> List[CodeClone]:
-        """
-        Detect clones within a single file.
-        """
         with open(file_path, 'r', encoding='utf-8') as f:
             lines = f.readlines()
         
@@ -75,9 +47,6 @@ class CloneDetector:
         file1: str, 
         file2: str
     ) -> List[CodeClone]:
-        """
-        Detect clones between two files.
-        """
         with open(file1, 'r', encoding='utf-8') as f:
             lines1 = f.readlines()
         
@@ -108,11 +77,6 @@ class CloneDetector:
         return self.clones
     
     def _detect_type1_clones(self, lines: List[str], file_path: str):
-        """
-        Detect Type 1 clones (exact copies).
-        
-        Uses rolling hash for efficiency.
-        """
         # Normalize lines (remove whitespace/comments)
         normalized = []
         for line in lines:
@@ -136,7 +100,6 @@ class CloneDetector:
                     for k in range(j + 1, len(positions)):
                         clone_size = self.min_lines
                         
-                        # Skip small clones in same file (common patterns)
                         if clone_size < self.min_same_file_lines:
                             continue
                         
@@ -152,11 +115,6 @@ class CloneDetector:
                         ))
     
     def _detect_type2_clones(self, tree: ast.AST, file_path: str):
-        """
-        Detect Type 2 clones (renamed variables).
-        
-        Uses AST structural comparison.
-        """
         functions = []
         
         # Extract all functions
@@ -185,16 +143,10 @@ class CloneDetector:
                     ))
     
     def _hash_code_block(self, lines: List[str]) -> str:
-        """
-        Hash a block of code.
-        """
         combined = ''.join(lines)
         return hashlib.md5(combined.encode()).hexdigest()
     
     def _calculate_similarity(self, block1: List[str], block2: List[str]) -> float:
-        """
-        Calculate similarity between two code blocks (0-1).
-        """
         # Use sequence matcher
         matcher = difflib.SequenceMatcher(None, block1, block2)
         return matcher.ratio()
@@ -204,11 +156,6 @@ class CloneDetector:
         node1: ast.AST, 
         node2: ast.AST
     ) -> float:
-        """
-        Compare AST structure ignoring variable names.
-        
-        Returns similarity score (0-1).
-        """
         # Get structure fingerprints
         struct1 = self._get_ast_fingerprint(node1)
         struct2 = self._get_ast_fingerprint(node2)
@@ -221,9 +168,6 @@ class CloneDetector:
         return matcher.ratio()
     
     def _get_ast_fingerprint(self, node: ast.AST) -> str:
-        """
-        Get structural fingerprint of AST (ignoring names).
-        """
         fingerprint = []
         
         for child in ast.walk(node):
@@ -241,9 +185,6 @@ class CloneDetector:
         return ''.join(fingerprint)
     
     def get_clone_report(self) -> Dict[str, Any]:
-        """
-        Generate comprehensive clone report.
-        """
         if not self.clones:
             return {
                 'total_clones': 0,
@@ -305,27 +246,13 @@ class CloneDetector:
             'recommendations': recommendations
         }
 
-
 class SemanticCloneDetector:
-    """
-    Detect semantic clones (Type 4).
-    
-    Uses program slicing and abstract interpretation
-    to find code that does the same thing differently.
-    """
+    pass
     
     def __init__(self):
         self.semantic_clones = []
     
     def detect_semantic_clones(self, tree: ast.AST) -> List[Dict]:
-        """
-        Detect functions that do the same thing.
-        
-        Uses:
-        - Input/output analysis
-        - Behavior fingerprinting
-        - Symbolic execution (simplified)
-        """
         functions = []
         
         # Extract functions with their behavior
@@ -358,9 +285,6 @@ class SemanticCloneDetector:
         return self.semantic_clones
     
     def _analyze_function_behavior(self, func: ast.FunctionDef) -> Dict:
-        """
-        Analyze what a function does (behavior).
-        """
         behavior = {
             'operations': [],
             'returns_type': None,
@@ -395,11 +319,6 @@ class SemanticCloneDetector:
         return behavior
     
     def _compare_behaviors(self, b1: Dict, b2: Dict) -> float:
-        """
-        Compare two function behaviors.
-        
-        Returns similarity score (0-1).
-        """
         score = 0.0
         factors = 0
         
@@ -429,7 +348,6 @@ class SemanticCloneDetector:
         factors += 0.125
         
         return score / factors if factors > 0 else 0.0
-
 
 # Example usage
 if __name__ == '__main__':

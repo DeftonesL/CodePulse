@@ -221,30 +221,39 @@ class ComprehensiveScanner:
         print(f"\nDirectory: {dir_path}")
         print(f"Started: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
         
-        # Supported file extensions
+        # Supported file extensions - ALL 25+ LANGUAGES
         code_extensions = {
-            '.py': 'Python',
-            '.js': 'JavaScript',
-            '.jsx': 'JavaScript',
-            '.ts': 'TypeScript',
-            '.tsx': 'TypeScript',
-            '.php': 'PHP',
+            '.py': 'Python', '.pyw': 'Python',
+            '.js': 'JavaScript', '.jsx': 'JavaScript', '.mjs': 'JavaScript',
+            '.ts': 'TypeScript', '.tsx': 'TypeScript',
             '.java': 'Java',
+            '.c': 'C', '.h': 'C',
+            '.cpp': 'C++', '.cc': 'C++', '.cxx': 'C++', '.hpp': 'C++',
             '.cs': 'C#',
             '.go': 'Go',
-            '.rb': 'Ruby',
             '.rs': 'Rust',
-            '.kt': 'Kotlin',
+            '.rb': 'Ruby',
+            '.php': 'PHP',
+            '.swift': 'Swift',
+            '.kt': 'Kotlin', '.kts': 'Kotlin',
+            '.scala': 'Scala',
+            '.r': 'R',
+            '.dart': 'Dart',
+            '.lua': 'Lua',
+            '.sh': 'Shell', '.bash': 'Shell',
         }
         
         web_extensions = {
-            '.html': 'HTML',
-            '.htm': 'HTML',
+            '.html': 'HTML', '.htm': 'HTML',
+            '.css': 'CSS', '.scss': 'SCSS', '.sass': 'SASS',
+            '.xml': 'XML',
         }
         
         data_extensions = {
             '.json': 'JSON',
+            '.yml': 'YAML', '.yaml': 'YAML',
             '.sql': 'SQL',
+            '.md': 'Markdown',
         }
         
         all_extensions = {**code_extensions, **web_extensions, **data_extensions}

@@ -1,40 +1,26 @@
-"""
-Code Patterns Detector
-======================
-
-Detects design patterns, anti-patterns, and code smells.
-Provides recommendations for improvement.
-
-Author: Saleh Almqati
-License: MIT
-"""
-
 import ast
 import re
 from typing import List, Dict, Any, Set
 from dataclasses import dataclass
 from enum import Enum
 
-
 class PatternType(Enum):
-    """Pattern classification"""
+    pass
     DESIGN_PATTERN = "design_pattern"
     ANTI_PATTERN = "anti_pattern"
     CODE_SMELL = "code_smell"
     BEST_PRACTICE = "best_practice"
 
-
 class Severity(Enum):
-    """Pattern severity"""
+    pass
     INFO = "info"
     WARNING = "warning"
     ERROR = "error"
     CRITICAL = "critical"
 
-
 @dataclass
 class DetectedPattern:
-    """Detected code pattern"""
+    pass
     name: str
     type: PatternType
     severity: Severity
@@ -44,31 +30,13 @@ class DetectedPattern:
     recommendation: str
     example: str = ""
 
-
 class CodePatternsDetector:
-    """
-    Detect design patterns, anti-patterns, and code smells.
-    
-    Recognizes:
-    - Design Patterns (Singleton, Factory, Observer, etc.)
-    - Anti-patterns (God Class, Spaghetti Code, etc.)
-    - Code Smells (Long Method, Duplicated Code, etc.)
-    - Best Practices (Type Hints, Docstrings, etc.)
-    """
+    pass
     
     def __init__(self):
         self.patterns: List[DetectedPattern] = []
     
     def analyze_file(self, file_path: str) -> List[DetectedPattern]:
-        """
-        Analyze file for patterns.
-        
-        Args:
-            file_path: Path to file
-            
-        Returns:
-            List of detected patterns
-        """
         self.patterns = []
         
         try:
@@ -89,7 +57,6 @@ class CodePatternsDetector:
         return self.patterns
     
     def _detect_design_patterns(self, tree: ast.AST, file_path: str):
-        """Detect design patterns"""
         
         for node in ast.walk(tree):
             if isinstance(node, ast.ClassDef):
@@ -140,7 +107,6 @@ class CodePatternsDetector:
                     ))
     
     def _detect_anti_patterns(self, tree: ast.AST, file_path: str, code: str):
-        """Detect anti-patterns"""
         
         for node in ast.walk(tree):
             if isinstance(node, ast.ClassDef):
@@ -218,7 +184,6 @@ class CodePatternsDetector:
                 ))
     
     def _detect_code_smells(self, tree: ast.AST, file_path: str, code: str):
-        """Detect code smells"""
         
         for node in ast.walk(tree):
             # Magic Numbers
@@ -267,7 +232,6 @@ class CodePatternsDetector:
                     ))
     
     def _detect_best_practices(self, tree: ast.AST, file_path: str, code: str):
-        """Detect missing best practices"""
         
         for node in ast.walk(tree):
             if isinstance(node, ast.FunctionDef):
@@ -304,7 +268,6 @@ class CodePatternsDetector:
                     ))
     
     def _calculate_nesting_depth(self, node: ast.AST, depth: int = 0) -> int:
-        """Calculate nesting depth of a node"""
         max_depth = depth
         
         for child in ast.iter_child_nodes(node):
@@ -315,7 +278,6 @@ class CodePatternsDetector:
         return max_depth
     
     def get_summary(self) -> Dict[str, Any]:
-        """Get summary of detected patterns"""
         summary = {
             'total_patterns': len(self.patterns),
             'by_type': {},
@@ -341,7 +303,6 @@ class CodePatternsDetector:
                 })
         
         return summary
-
 
 # Example usage
 if __name__ == '__main__':

@@ -1,17 +1,3 @@
-"""
-CodePulse Security Module
-============================
-
-Security vulnerability detection. I learned about regex patterns and common security
-issues while building this. It scans for hardcoded secrets, SQL injection patterns,
-and other security problems.
-
-This module taught me a lot about security best practices!
-
-Author: Saleh Almqati
-License: MIT
-"""
-
 import re
 import os
 import logging
@@ -22,17 +8,15 @@ import hashlib
 
 logger = logging.getLogger(__name__)
 
-
 class SecurityLevel(Enum):
-    """Security issue severity levels"""
+    pass
     CRITICAL = "critical"
     HIGH = "high"
     MEDIUM = "medium"
     LOW = "low"
 
-
 class VulnerabilityType(Enum):
-    """Types of security vulnerabilities"""
+    pass
     SECRET_EXPOSURE = "secret_exposure"
     SQL_INJECTION = "sql_injection"
     XSS = "cross_site_scripting"
@@ -42,10 +26,9 @@ class VulnerabilityType(Enum):
     WEAK_CRYPTO = "weak_cryptography"
     HARDCODED_CREDENTIALS = "hardcoded_credentials"
 
-
 @dataclass
 class SecurityIssue:
-    """Represents a security vulnerability found in code"""
+    pass
     file_path: str
     line_number: int
     severity: SecurityLevel
@@ -57,25 +40,13 @@ class SecurityIssue:
     cwe_id: Optional[str] = None  # Common Weakness Enumeration ID
     
     def to_dict(self) -> Dict:
-        """Convert to dictionary for JSON serialization"""
         data = asdict(self)
         data['severity'] = self.severity.value
         data['vulnerability_type'] = self.vulnerability_type.value
         return data
 
-
 class SecurityScanner:
-    """
-    Advanced security scanning engine for code analysis.
-    
-    Detects a wide range of security issues including:
-    - Hardcoded secrets and credentials
-    - SQL injection vulnerabilities
-    - Command injection risks
-    - Weak cryptographic implementations
-    - Path traversal vulnerabilities
-    - And more...
-    """
+    pass
     
     # Patterns for detecting secrets and credentials
     SECRET_PATTERNS = {
@@ -161,20 +132,9 @@ class SecurityScanner:
     ]
     
     def __init__(self):
-        """Initialize the security scanner"""
         logger.info("Initialized Security Scanner")
     
     def scan_for_secrets(self, content: str, file_path: str) -> List[SecurityIssue]:
-        """
-        Scan code for hardcoded secrets and credentials.
-        
-        Args:
-            content: File content to scan
-            file_path: Path to the file
-            
-        Returns:
-            List of SecurityIssue objects
-        """
         issues = []
         lines = content.split('\n')
         
@@ -206,16 +166,6 @@ class SecurityScanner:
         return issues
     
     def scan_for_sql_injection(self, content: str, file_path: str) -> List[SecurityIssue]:
-        """
-        Scan for SQL injection vulnerabilities.
-        
-        Args:
-            content: File content to scan
-            file_path: Path to the file
-            
-        Returns:
-            List of SecurityIssue objects
-        """
         issues = []
         lines = content.split('\n')
         
@@ -238,16 +188,6 @@ class SecurityScanner:
         return issues
     
     def scan_for_command_injection(self, content: str, file_path: str) -> List[SecurityIssue]:
-        """
-        Scan for command injection vulnerabilities.
-        
-        Args:
-            content: File content to scan
-            file_path: Path to the file
-            
-        Returns:
-            List of SecurityIssue objects
-        """
         issues = []
         lines = content.split('\n')
         
@@ -272,16 +212,6 @@ class SecurityScanner:
         return issues
     
     def scan_for_weak_crypto(self, content: str, file_path: str) -> List[SecurityIssue]:
-        """
-        Scan for weak cryptographic implementations.
-        
-        Args:
-            content: File content to scan
-            file_path: Path to the file
-            
-        Returns:
-            List of SecurityIssue objects
-        """
         issues = []
         lines = content.split('\n')
         
@@ -304,16 +234,6 @@ class SecurityScanner:
         return issues
     
     def scan_for_path_traversal(self, content: str, file_path: str) -> List[SecurityIssue]:
-        """
-        Scan for path traversal vulnerabilities.
-        
-        Args:
-            content: File content to scan
-            file_path: Path to the file
-            
-        Returns:
-            List of SecurityIssue objects
-        """
         issues = []
         lines = content.split('\n')
         
@@ -336,15 +256,6 @@ class SecurityScanner:
         return issues
     
     def scan_file(self, file_path: str) -> List[SecurityIssue]:
-        """
-        Perform comprehensive security scan of a file.
-        
-        Args:
-            file_path: Path to file to scan
-            
-        Returns:
-            List of all security issues found
-        """
         try:
             with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
                 content = f.read()
@@ -364,15 +275,6 @@ class SecurityScanner:
         return all_issues
     
     def generate_report(self, issues: List[SecurityIssue]) -> Dict:
-        """
-        Generate a security report from found issues.
-        
-        Args:
-            issues: List of security issues
-            
-        Returns:
-            Report dictionary with statistics and details
-        """
         # Count by severity
         severity_counts = {
             'critical': 0,
@@ -411,9 +313,7 @@ class SecurityScanner:
             'issues': [issue.to_dict() for issue in issues]
         }
 
-
 def main():
-    """Example usage of the security scanner"""
     import sys
     
     if len(sys.argv) < 2:
@@ -456,7 +356,6 @@ def main():
                 print(f"\n  {issue_dict['title']}")
                 print(f"  File: {issue_dict['file_path']}:{issue_dict['line_number']}")
                 print(f"  {issue_dict['description']}")
-
 
 if __name__ == '__main__':
     main()

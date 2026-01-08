@@ -1,26 +1,20 @@
 # CodePulse Requirements
-# =======================
-# Core dependencies for deep code intelligence
+# Core dependencies
 
-
-click>=8.0.0       
-rich>=13.0.0       
+# Essential
+click>=8.0.0
+rich>=13.0.0
 networkx>=3.0
+jinja2>=3.1.0
 
-
-# ═══════════════════════════════════════════════════════════════
-# OPTIONAL: AI INTEGRATION
-# ═══════════════════════════════════════════════════════════════
-
-anthropic>=0.18.0  
-openai>=1.0.0      
-
-
-
-
+# Testing
 pytest>=8.0.0
 pytest-cov>=4.1.0
 
-
+# Code Quality
 black>=24.0.0
 mypy>=1.8.0
+
+# Optional AI
+# anthropic>=0.18.0
+# openai>=1.0.0

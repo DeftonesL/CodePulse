@@ -1,0 +1,88 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "codepulse"
+version = "0.7.1"
+description = "Advanced code analysis tool with security scanning, code quality assessment, and performance analysis"
+readme = "README.md"
+requires-python = ">=3.9"
+license = {text = "MIT"}
+authors = [
+    {name = "Saleh Almqati", email = "saleh@example.com"}
+]
+maintainers = [
+    {name = "Saleh Almqati", email = "saleh@example.com"}
+]
+keywords = [
+    "code-analysis",
+    "security-scanner",
+    "static-analysis",
+    "vulnerability-detection",
+    "code-quality",
+    "sast",
+    "devsecops"
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Quality Assurance",
+    "Topic :: Security",
+]
+
+dependencies = [
+    "networkx>=3.0",
+    "click>=8.0.0",
+    "rich>=13.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "black>=22.0.0",
+    "flake8>=5.0.0",
+    "mypy>=1.0.0",
+]
+ai = [
+    "anthropic>=0.18.0",
+    "openai>=1.0.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/DeftonesL/CodePulse"
+Repository = "https://github.com/DeftonesL/CodePulse"
+"Bug Tracker" = "https://github.com/DeftonesL/CodePulse/issues"
+Changelog = "https://github.com/DeftonesL/CodePulse/blob/main/CHANGELOG.md"
+
+[project.scripts]
+codepulse = "src.core.cli:main"
+
+[tool.setuptools]
+packages = ["src", "src.core", "src.modules", "src.utils"]
+
+[tool.setuptools.package-data]
+src = ["*.json", "*.txt"]
+
+[tool.black]
+line-length = 100
+target-version = ['py39', 'py310', 'py311', 'py312']
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+addopts = "-v --cov=src --cov-report=html --cov-report=term"
+
+[tool.mypy]
+python_version = "3.9"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false
+ignore_missing_imports = true

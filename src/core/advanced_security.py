@@ -1,18 +1,3 @@
-"""
-Advanced Security Scanner
-==========================
-
-Comprehensive security analysis including:
-- SQL Injection detection
-- XSS vulnerabilities
-- Command Injection
-- Path Traversal
-- Insecure Deserialization
-- Hardcoded Secrets
-- Cryptographic Issues
-- Authentication/Authorization Issues
-"""
-
 import ast
 import re
 import os
@@ -20,10 +5,9 @@ from typing import Dict, List, Any, Set
 from dataclasses import dataclass
 from pathlib import Path
 
-
 @dataclass
 class SecurityIssue:
-    """Security vulnerability"""
+    pass
     type: str
     severity: str  # CRITICAL, HIGH, MEDIUM, LOW
     category: str
@@ -35,12 +19,8 @@ class SecurityIssue:
     cwe_id: str  # Common Weakness Enumeration ID
     owasp: str   # OWASP Top 10 reference
 
-
 class AdvancedSecurityScanner:
-    """
-    Advanced security vulnerability scanner.
-    Detects OWASP Top 10 and common security issues.
-    """
+    pass
     
     def __init__(self):
         self.issues = []
@@ -49,7 +29,6 @@ class AdvancedSecurityScanner:
         self.xss_patterns = self._load_xss_patterns()
         
     def scan_file(self, file_path: str) -> List[SecurityIssue]:
-        """Comprehensive security scan"""
         self.issues = []
         
         try:
@@ -83,7 +62,6 @@ class AdvancedSecurityScanner:
         return self.issues
     
     def _load_secrets_patterns(self) -> List[tuple]:
-        """Load patterns for secret detection"""
         return [
             # API Keys
             (r'api[_-]?key["\s]*[:=]["\s]*([a-zA-Z0-9]{20,})', 'API Key', 'HIGH'),
@@ -111,7 +89,6 @@ class AdvancedSecurityScanner:
         ]
     
     def _load_sql_patterns(self) -> List[str]:
-        """Load SQL injection patterns"""
         return [
             'execute', 'executemany', 'cursor.execute',
             'raw', 'RawSQL', 'extra',
@@ -119,14 +96,12 @@ class AdvancedSecurityScanner:
         ]
     
     def _load_xss_patterns(self) -> List[str]:
-        """Load XSS patterns"""
         return [
             'innerHTML', 'document.write', 'eval',
             'dangerouslySetInnerHTML', '__html'
         ]
     
     def _detect_sql_injection(self, tree: ast.AST, file_path: str, lines: List[str]):
-        """Detect SQL injection vulnerabilities"""
         for node in ast.walk(tree):
             if isinstance(node, ast.Call):
                 # Check for string formatting in SQL
@@ -150,7 +125,6 @@ class AdvancedSecurityScanner:
                                 ))
     
     def _is_sql_call(self, node: ast.Call) -> bool:
-        """Check if call is SQL-related"""
         if isinstance(node.func, ast.Attribute):
             if node.func.attr in ['execute', 'executemany', 'raw']:
                 return True
@@ -160,14 +134,12 @@ class AdvancedSecurityScanner:
         return False
     
     def _has_variable_in_sql(self, node: ast.AST) -> bool:
-        """Check if SQL contains variables"""
         for child in ast.walk(node):
             if isinstance(child, (ast.Name, ast.Attribute)):
                 return True
         return False
     
     def _detect_xss(self, tree: ast.AST, file_path: str, lines: List[str]):
-        """Detect XSS vulnerabilities"""
         for node in ast.walk(tree):
             # Check for dangerous functions
             if isinstance(node, ast.Call):
@@ -203,7 +175,6 @@ class AdvancedSecurityScanner:
                         ))
     
     def _detect_command_injection(self, tree: ast.AST, file_path: str, lines: List[str]):
-        """Detect command injection"""
         dangerous_functions = ['system', 'popen', 'exec', 'spawn', 'call']
         
         for node in ast.walk(tree):
@@ -238,7 +209,6 @@ class AdvancedSecurityScanner:
                         ))
     
     def _detect_path_traversal(self, tree: ast.AST, file_path: str, lines: List[str]):
-        """Detect path traversal vulnerabilities"""
         for node in ast.walk(tree):
             if isinstance(node, ast.Call):
                 if isinstance(node.func, ast.Name):
@@ -259,7 +229,6 @@ class AdvancedSecurityScanner:
                             ))
     
     def _detect_hardcoded_secrets(self, content: str, file_path: str, lines: List[str]):
-        """Detect hardcoded secrets"""
         for pattern, secret_type, severity in self.secrets_patterns:
             for match in re.finditer(pattern, content, re.IGNORECASE):
                 line_num = content[:match.start()].count('\n') + 1
@@ -278,7 +247,6 @@ class AdvancedSecurityScanner:
                 ))
     
     def _detect_weak_crypto(self, tree: ast.AST, file_path: str, lines: List[str]):
-        """Detect weak cryptography"""
         weak_algos = {
             'md5': ('MD5', 'Use SHA-256 or better'),
             'sha1': ('SHA-1', 'Use SHA-256 or better'),
@@ -306,7 +274,6 @@ class AdvancedSecurityScanner:
                             ))
     
     def _detect_insecure_deserialization(self, tree: ast.AST, file_path: str, lines: List[str]):
-        """Detect insecure deserialization"""
         for node in ast.walk(tree):
             if isinstance(node, ast.Call):
                 if isinstance(node.func, ast.Attribute):
@@ -328,7 +295,6 @@ class AdvancedSecurityScanner:
                                 ))
     
     def _detect_xxe(self, tree: ast.AST, file_path: str, lines: List[str]):
-        """Detect XML External Entity (XXE) vulnerabilities"""
         for node in ast.walk(tree):
             if isinstance(node, ast.Call):
                 if isinstance(node.func, ast.Attribute):
@@ -347,7 +313,6 @@ class AdvancedSecurityScanner:
                         ))
     
     def _detect_ssrf(self, tree: ast.AST, file_path: str, lines: List[str]):
-        """Detect Server-Side Request Forgery"""
         http_functions = ['get', 'post', 'request', 'urlopen']
         
         for node in ast.walk(tree):
@@ -370,7 +335,6 @@ class AdvancedSecurityScanner:
                             ))
     
     def _detect_authentication_issues(self, tree: ast.AST, file_path: str, lines: List[str]):
-        """Detect authentication issues"""
         for node in ast.walk(tree):
             # Check for == comparison with passwords
             if isinstance(node, ast.Compare):
@@ -394,12 +358,9 @@ class AdvancedSecurityScanner:
                                     ))
     
     def _detect_authorization_issues(self, tree: ast.AST, file_path: str, lines: List[str]):
-        """Detect authorization issues"""
-        # This is a simplified check - would need more context in real implementation
         pass
     
     def _detect_session_issues(self, tree: ast.AST, file_path: str, lines: List[str]):
-        """Detect session management issues"""
         for node in ast.walk(tree):
             if isinstance(node, ast.Assign):
                 for target in node.targets:
@@ -423,7 +384,6 @@ class AdvancedSecurityScanner:
                                     ))
     
     def _detect_file_upload_issues(self, tree: ast.AST, file_path: str, lines: List[str]):
-        """Detect file upload vulnerabilities"""
         for node in ast.walk(tree):
             if isinstance(node, ast.Call):
                 if isinstance(node.func, ast.Attribute):
@@ -442,7 +402,6 @@ class AdvancedSecurityScanner:
                         ))
     
     def _detect_regex_dos(self, tree: ast.AST, file_path: str, lines: List[str]):
-        """Detect ReDoS vulnerabilities"""
         dangerous_patterns = [
             r'(a+)+',
             r'(a*)*',
@@ -474,7 +433,6 @@ class AdvancedSecurityScanner:
                                     ))
     
     def get_report(self) -> Dict[str, Any]:
-        """Generate security report"""
         by_severity = {'CRITICAL': 0, 'HIGH': 0, 'MEDIUM': 0, 'LOW': 0}
         by_category = {}
         
@@ -509,7 +467,6 @@ class AdvancedSecurityScanner:
                 for i in self.issues
             ]
         }
-
 
 if __name__ == '__main__':
     import sys

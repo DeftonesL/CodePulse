@@ -1,15 +1,3 @@
-"""
-Intelligent Code Smell Detector
-================================
-
-Advanced code smell detection using pattern matching and heuristics.
-Goes beyond simple rule-based detection to understand context.
-
-Custom algorithms for detecting subtle code quality issues.
-
-Author: Saleh Almqati
-"""
-
 import ast
 import re
 from typing import List, Dict, Any, Set, Tuple
@@ -17,10 +5,9 @@ from dataclasses import dataclass
 from collections import Counter, defaultdict
 import math
 
-
 @dataclass
 class CodeSmell:
-    """Represents a detected code smell"""
+    pass
     name: str
     severity: str  # CRITICAL, HIGH, MEDIUM, LOW
     category: str  # Complexity, Coupling, Cohesion, Size, etc.
@@ -31,15 +18,9 @@ class CodeSmell:
     refactoring_suggestion: str
     code_example: str = ""
 
-
 class IntelligentSmellDetector:
-    """
-    Detects code smells using intelligent analysis.
+    pass
     
-    Not just simple pattern matching - uses context-aware detection.
-    """
-    
-    # Standard Python modules to ignore in Feature Envy detection
     STANDARD_MODULES = {
         'sys', 'os', 'ast', 're', 'json', 'time', 'datetime', 'pathlib',
         'logging', 'typing', 'collections', 'itertools', 'functools',
@@ -60,9 +41,6 @@ class IntelligentSmellDetector:
         self.metrics = {}
         
     def detect_smells(self, file_path: str) -> List[CodeSmell]:
-        """
-        Detect all code smells in a file.
-        """
         with open(file_path, 'r', encoding='utf-8') as f:
             code = f.read()
         
@@ -84,9 +62,6 @@ class IntelligentSmellDetector:
         return self.smells
     
     def _calculate_file_metrics(self, tree: ast.AST, code: str):
-        """
-        Calculate comprehensive metrics for the file.
-        """
         lines = code.split('\n')
         
         self.metrics = {
@@ -124,9 +99,6 @@ class IntelligentSmellDetector:
             self.metrics['max_class_size'] = max(classes)
     
     def _detect_bloater_smells(self, tree: ast.AST, file_path: str):
-        """
-        Detect "Bloater" smells (large structures).
-        """
         for node in ast.walk(tree):
             if isinstance(node, ast.FunctionDef):
                 # Long Method - using relaxed threshold
@@ -141,19 +113,7 @@ class IntelligentSmellDetector:
                         line=node.lineno,
                         impact=f"Difficult to understand and maintain. Higher bug probability.",
                         refactoring_suggestion=f"Extract smaller methods. Aim for < {self.LONG_METHOD_THRESHOLD} lines per function.",
-                        code_example=f"""# Current: {length} lines
-def {node.name}(...):
-    # Too much code here
-
-# Refactor to:
-def {node.name}(...):
-    step1()
-    step2()
-    step3()
-
-def step1(): ...
-def step2(): ...
-def step3(): ..."""
+                        code_example=f
                     ))
                 
                 # Long Parameter List - using relaxed threshold
@@ -168,17 +128,7 @@ def step3(): ..."""
                         line=node.lineno,
                         impact="Hard to call, understand, and maintain.",
                         refactoring_suggestion="Use parameter objects or configuration classes.",
-                        code_example=f"""# Bad:
-def {node.name}(a, b, c, d, e, f): ...
-
-# Good:
-@dataclass
-class Config:
-    a: type
-    b: type
-    # ...
-
-def {node.name}(config: Config): ..."""
+                        code_example=f
                     ))
             
             elif isinstance(node, ast.ClassDef):
@@ -196,25 +146,10 @@ def {node.name}(config: Config): ..."""
                         line=node.lineno,
                         impact="Violates Single Responsibility Principle. Hard to maintain.",
                         refactoring_suggestion="Split into smaller, focused classes.",
-                        code_example=f"""# Current: {size} lines, {len(methods)} methods
-class {node.name}:
-    # Too many responsibilities
-
-# Refactor to:
-class {node.name}Handler:
-    # Handles X
-    
-class {node.name}Processor:
-    # Processes Y
-    
-class {node.name}Validator:
-    # Validates Z"""
+                        code_example=f
                     ))
     
     def _detect_oo_abuser_smells(self, tree: ast.AST, file_path: str):
-        """
-        Detect Object-Oriented abuse smells.
-        """
         for node in ast.walk(tree):
             if isinstance(node, ast.FunctionDef):
                 self_assignments = []
@@ -242,23 +177,10 @@ class {node.name}Validator:
                         line=node.lineno,
                         impact="Tight coupling. Changes in one class break another.",
                         refactoring_suggestion="Use proper encapsulation. Add methods instead of accessing fields.",
-                        code_example="""# Bad:
-def process(self, other):
-    x = other.field1
-    y = other.field2
-    z = other._internal_field  # Accessing internals!
-
-# Good:
-def process(self, other):
-    x = other.get_field1()
-    y = other.get_field2()
-    # Don't access internals"""
+                        code_example="Use getters/setters or proper method calls"
                     ))
     
     def _detect_change_preventer_smells(self, tree: ast.AST, file_path: str):
-        """
-        Detect smells that prevent easy changes.
-        """
         for node in ast.walk(tree):
             if isinstance(node, ast.ClassDef):
                 # Count different types of operations
@@ -289,31 +211,10 @@ def process(self, other):
                         line=node.lineno,
                         impact="Changes for different reasons. Hard to maintain.",
                         refactoring_suggestion="Split into separate classes, each with one responsibility.",
-                        code_example=f"""# Current - multiple responsibilities:
-class {node.name}:
-    def save_to_db(): ...      # Persistence
-    def validate(): ...         # Validation
-    def calculate(): ...        # Business logic
-    def render_html(): ...      # Presentation
-
-# Refactor to:
-class {node.name}Repository:  # Persistence
-    def save(): ...
-    
-class {node.name}Validator:   # Validation
-    def validate(): ...
-    
-class {node.name}:             # Business logic
-    def calculate(): ...
-    
-class {node.name}Presenter:   # Presentation
-    def render_html(): ..."""
+                        code_example=f
                     ))
     
     def _detect_dispensable_smells(self, tree: ast.AST, file_path: str):
-        """
-        Detect unnecessary code.
-        """
         for node in ast.walk(tree):
             # Lazy Class (class that doesn't do enough)
             if isinstance(node, ast.ClassDef):
@@ -330,49 +231,10 @@ class {node.name}Presenter:   # Presentation
                         line=node.lineno,
                         impact="Unnecessary abstraction. Adds complexity without value.",
                         refactoring_suggestion="Remove class and inline functionality, or add more behavior.",
-                        code_example=f"""# Current:
-class {node.name}:
-    def __init__(self, x):
-        self.x = x
-    
-    def get_x(self):
-        return self.x
-
-# Refactor: Just use the value directly
-# Or add more meaningful behavior to justify the class"""
-                    ))
-            
-            # Dead Code - deprecated functions
-            if isinstance(node, ast.FunctionDef):
-                docstring = ast.get_docstring(node)
-                if docstring and 'deprecated' in docstring.lower():
-                    self.smells.append(CodeSmell(
-                        name="Dead Code",
-                        severity="MEDIUM",
-                        category="Dispensable",
-                        description=f"Function '{node.name}' is marked as deprecated",
-                        location=file_path,
-                        line=node.lineno,
-                        impact="Confuses developers. May be accidentally used.",
-                        refactoring_suggestion="Remove deprecated code or migrate callers.",
-                        code_example=f"""# Remove this:
-def {node.name}(...):
-    '''DEPRECATED: Use new_function instead'''
-    ...
-
-# Or properly deprecate with warnings:
-import warnings
-
-@deprecated
-def {node.name}(...):
-    warnings.warn("Use new_function", DeprecationWarning)
-    ..."""
+                        code_example=f
                     ))
     
     def _detect_coupler_smells(self, tree: ast.AST, file_path: str):
-        """
-        Detect coupling smells.
-        """
         for node in ast.walk(tree):
             if isinstance(node, ast.FunctionDef):
                 # Count self vs other access
@@ -393,7 +255,6 @@ def {node.name}(...):
                     if other_obj.lower() in self.STANDARD_MODULES:
                         continue
                     
-                    # Skip single-letter variables (likely loop variables)
                     if len(other_obj) == 1:
                         continue
                     
@@ -407,25 +268,10 @@ def {node.name}(...):
                             line=node.lineno,
                             impact="Method is in the wrong class. Poor cohesion.",
                             refactoring_suggestion=f"Move this method to the '{other_obj}' class.",
-                            code_example=f"""# Current (in wrong class):
-class A:
-    def {node.name}(self, other):
-        x = other.field1
-        y = other.field2
-        return other.method1() + other.method2()
-
-# Move to correct class:
-class B:  # The 'other' class
-    def {node.name}(self):
-        x = self.field1
-        y = self.field2
-        return self.method1() + self.method2()"""
+                            code_example=f
                         ))
     
     def get_smell_report(self) -> Dict[str, Any]:
-        """
-        Generate comprehensive smell report.
-        """
         if not self.smells:
             return {
                 'total_smells': 0,
@@ -491,7 +337,6 @@ class B:  # The 'other' class
             'recommendations': recommendations,
             'metrics': self.metrics
         }
-
 
 # Example usage
 if __name__ == '__main__':
