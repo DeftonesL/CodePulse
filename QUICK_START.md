@@ -1,195 +1,315 @@
 # Quick Start Guide
 
-Get started with CodePulse in 5 minutes.
-
-## Installation
-
-```bash
-# Clone
-git clone https://github.com/DeftonesL/CodePulse.git
-cd CodePulse
-
-# Install
-pip install -e .
-
-# Verify
-python -c "import src.core.scanner; print('✓ Ready')"
-```
-
-## Basic Usage
-
-### 1. Analyze Single File
-
-```bash
-python3 -m src.core.scanner path/to/file.py
-```
-
-**Output:**
-```
-Scanning: file.py
-Language: Python
-Lines: 142
-Functions: 8
-Classes: 2
-Quality Score: 85/100 (B+)
-```
-
-### 2. Deep Analysis
-
-```bash
-python3 src/core/deep_analysis.py path/to/file.py
-```
-
-**Shows:**
-- Control Flow Graph analysis
-- Data Flow dependencies
-- Unreachable code
-- Infinite loops
-- Complexity metrics
-
-### 3. Find Code Clones
-
-```bash
-python3 src/core/clone_detection.py path/to/file.py
-```
-
-**Detects:**
-- Type 1: Exact copies
-- Type 2: Renamed variables
-- Type 3: Modified code
-- Type 4: Semantic clones
-
-### 4. Code Smell Detection
-
-```bash
-python3 src/core/smell_detector.py path/to/file.py
-```
-
-**Finds:**
-- Long methods
-- God classes
-- Feature envy
-- Dead code
-- High coupling
-
-### 5. Comprehensive Analysis
-
-```bash
-python3 src/core/analyzer.py ./project_directory
-```
-
-**Full Report:**
-- All analysis types
-- Cross-file architecture
-- Quality trends
-- Actionable recommendations
-
-## Example Output
-
-```
-════════════════════════════════════════════════════════════════
-🫀 CODEPULSE - DEEP CODE INTELLIGENCE
-════════════════════════════════════════════════════════════════
-
-PROJECT: MyApp
-FILES: 42 | LINES: 5,234
-
-OVERALL HEALTH: 82.5/100 (B+)
-
-────────────────────────────────────────────────────────────────
-📊 DEEP ANALYSIS
-────────────────────────────────────────────────────────────────
-Control Flow:
-  ✓ Execution paths: 1,247
-  ⚠ Unreachable code: 3 blocks
-  ⚠ Infinite loops: 1 detected
-
-Data Flow:
-  ✓ Variables: 456
-  ⚠ Unused: 23
-
-────────────────────────────────────────────────────────────────
-🔍 CLONE DETECTION
-────────────────────────────────────────────────────────────────
-Total Clones: 15
-Duplicated Lines: 487 (9.3%)
-
-Top Clone:
-  📄 database.py:45-98 ↔ cache.py:120-173
-  📏 54 lines duplicated
-  💡 Extract to shared utility
-
-────────────────────────────────────────────────────────────────
-👃 CODE SMELLS
-────────────────────────────────────────────────────────────────
-Health: 78/100
-
-Critical:
-  1. [HIGH] Long Method - processData() (156 lines)
-     💡 Extract 4 smaller methods
-  
-  2. [HIGH] God Class - UserManager (34 methods)
-     💡 Split into Repository, Validator, Service
-
-────────────────────────────────────────────────────────────────
-🎯 RECOMMENDATIONS
-────────────────────────────────────────────────────────────────
-1. ⚡ Fix infinite loop (scheduler.py:234)
-2. 🔴 Refactor UserManager (violates SRP)
-3. 🟡 Remove 487 lines duplication
-```
-
-## Advanced Features
-
-### Cross-File Analysis
-
-```bash
-python3 src/core/cross_file_analysis.py ./project
-```
-
-Analyzes:
-- Architecture quality
-- Circular dependencies
-- Module coupling
-- Stability metrics
-
-### Quality Trends
-
-```bash
-python3 src/core/quality_trends.py add
-```
-
-Tracks:
-- Quality over time
-- Improvement trends
-- Code growth patterns
-
-## Configuration
-
-Create `codepulse.config.json`:
-
-```json
-{
-  "min_clone_lines": 6,
-  "max_method_length": 50,
-  "max_complexity": 10,
-  "excluded_dirs": ["tests", "venv"]
-}
-```
-
-## Next Steps
-
-1. Read [TECHNICAL_ARCHITECTURE.md](docs/TECHNICAL_ARCHITECTURE.md)
-2. Explore [WHY_CODEPULSE.md](WHY_CODEPULSE.md)
-3. Check [CONTRIBUTING.md](CONTRIBUTING.md)
-4. Run on your projects!
-
-## Need Help?
-
-- GitHub Issues: Report bugs
-- Email: xsll7c@gmail.com
-- Documentation: `/docs` folder
+Get CodePulse running in 5 minutes.
 
 ---
 
-**Happy Analyzing! 🫀**
+## Installation
+
+### Step 1: Extract Files
+```bash
+unzip CodePulse_v0.10.1_PROFESSIONAL.zip
+cd CodePulse
+```
+
+### Step 2: Install Dependencies
+```bash
+# Windows
+.\codepulse install
+
+# Linux/Mac
+./codepulse.sh install
+
+# Manual
+pip install -r requirements.txt
+```
+
+### Step 3: Verify Installation
+```bash
+python fast_scan.py --help
+```
+
+---
+
+## Basic Usage
+
+### Scan a Project
+
+**Windows:**
+```powershell
+.\codepulse scan C:\path\to\project
+```
+
+**Linux/Mac:**
+```bash
+./codepulse.sh scan /path/to/project
+```
+
+**Direct Python:**
+```bash
+python fast_scan.py ./project --format html
+```
+
+### View Results
+
+HTML report opens automatically in browser. Or find it in:
+```
+CodePulse/reports/fast_scan_projectname_timestamp.html
+```
+
+---
+
+## Common Tasks
+
+### Scan Different Languages
+
+All languages are scanned by default:
+```bash
+.\codepulse scan C:\mixed-project
+# Scans: Python, JavaScript, Java, C++, etc.
+```
+
+### Fast Scan (8 Workers)
+```bash
+.\codepulse fast C:\project
+```
+
+### Full Scan (No Cache)
+```bash
+.\codepulse full C:\project
+```
+
+### JSON Output
+```bash
+.\codepulse json C:\project
+```
+
+### Comprehensive Analysis
+```bash
+.\codepulse comprehensive C:\project
+```
+
+---
+
+## Understanding Reports
+
+### HTML Dashboard
+
+**Summary Cards:**
+- Total Files: Number of files analyzed
+- Total Issues: Security + Quality problems found
+- Security Issues: Vulnerabilities detected
+- Quality Score: Percentage of clean files
+
+**Issues Section:**
+- Lists all detected problems
+- Categorized by type (Security/Quality)
+- Shows affected files
+- Includes descriptions
+
+**Files Table:**
+- Complete file listing
+- Metrics per file (Lines, Functions, Classes)
+- Issue count per file
+- Status badges (Clean/Warning/Danger)
+
+### JSON Report
+
+```json
+{
+  "stats": {
+    "total_files": 10,
+    "analyzed_files": 10,
+    "total_issues": 5,
+    "duration": "2.3s"
+  },
+  "results": [
+    {
+      "file": "app.py",
+      "status": "success",
+      "result": {
+        "language": "Python",
+        "code_lines": 150,
+        "security_issues": ["SQL injection risk"],
+        "quality_issues": ["Function too complex"]
+      }
+    }
+  ]
+}
+```
+
+---
+
+## Command Reference
+
+### Scanning
+```bash
+scan <path>           # HTML report + auto-open
+fast <path>           # Fast scan (8 workers)
+full <path>           # Full scan (no cache)
+json <path>           # JSON output
+comprehensive <path>  # Deep analysis
+```
+
+### Management
+```bash
+install      # Install dependencies
+update       # Update CodePulse
+test         # Run test suite
+benchmark    # Performance test
+clean        # Clean cache/reports
+reports      # Open reports folder
+help         # Show commands
+```
+
+---
+
+## Troubleshooting
+
+### Python Not Found
+```bash
+# Check Python installation
+python --version
+
+# Should be 3.9 or higher
+# If not installed, download from python.org
+```
+
+### Permission Denied
+```bash
+# Windows: Run as Administrator
+# Linux/Mac: Add execute permission
+chmod +x codepulse.sh
+```
+
+### Module Not Found
+```bash
+# Reinstall dependencies
+.\codepulse install
+
+# Or manually
+pip install -r requirements.txt
+```
+
+### Slow Scanning
+```bash
+# Use fast mode
+.\codepulse fast C:\project
+
+# Or increase workers
+python fast_scan.py ./project --workers 16
+```
+
+### Out of Memory
+```bash
+# Scan specific file types only
+python fast_scan.py ./project --pattern "*.py"
+
+# Or scan subdirectories separately
+.\codepulse scan C:\project\module1
+.\codepulse scan C:\project\module2
+```
+
+---
+
+## Advanced Usage
+
+### Custom Workers
+```bash
+python fast_scan.py ./project --workers 16
+```
+
+### Specific File Pattern
+```bash
+python fast_scan.py ./project --pattern "*.js"
+```
+
+### Disable Cache
+```bash
+python fast_scan.py ./project --no-cache
+```
+
+### Custom Output Location
+```bash
+python fast_scan.py ./project --output my_report.html
+```
+
+### Clear Cache
+```bash
+python fast_scan.py ./project --clear-cache
+```
+
+---
+
+## Integration
+
+### CI/CD Pipeline
+```yaml
+# .github/workflows/code-scan.yml
+- name: Scan Code
+  run: |
+    pip install -r requirements.txt
+    python fast_scan.py ./src --format json
+```
+
+### Pre-commit Hook
+```bash
+# .git/hooks/pre-commit
+#!/bin/bash
+python fast_scan.py ./src --format json
+if [ $? -ne 0 ]; then
+    echo "Code scan failed"
+    exit 1
+fi
+```
+
+### Build Script
+```bash
+# build.sh
+echo "Running code analysis..."
+python fast_scan.py ./src --format json --output scan.json
+
+# Check for critical issues
+ISSUES=$(jq '.stats.total_issues' scan.json)
+if [ $ISSUES -gt 10 ]; then
+    echo "Too many issues: $ISSUES"
+    exit 1
+fi
+```
+
+---
+
+## Next Steps
+
+### Learn More
+- Read README.md for full feature list
+- Check CHANGELOG.md for recent updates
+- Browse docs/ for technical details
+
+### Customize
+- Edit scan patterns
+- Adjust worker count
+- Configure output format
+
+### Contribute
+- Report bugs on GitHub
+- Request features
+- Submit pull requests
+- See CONTRIBUTING.md
+
+---
+
+## Support
+
+**Issues:** https://github.com/DeftonesL/CodePulse/issues  
+**Documentation:** docs/  
+**Examples:** examples/
+
+---
+
+**You're ready to start analyzing code!**
+
+Run your first scan:
+```bash
+.\codepulse scan C:\your\project
+```

@@ -177,11 +177,7 @@ class IntelligentSmellDetector:
                         line=node.lineno,
                         impact="Tight coupling. Changes in one class break another.",
                         refactoring_suggestion="Use proper encapsulation. Add methods instead of accessing fields.",
-<<<<<<< HEAD
                         code_example="Use getters/setters or proper method calls"
-=======
-                        code_example=
->>>>>>> a7156cca8607b0f6a582bfd698319cea39b9fadc
                     ))
     
     def _detect_change_preventer_smells(self, tree: ast.AST, file_path: str):
