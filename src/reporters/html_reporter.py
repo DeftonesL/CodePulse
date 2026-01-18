@@ -14,7 +14,6 @@ class HTMLReporter:
     def generate(self, results: Dict[str, Any], output_file: str = 'report.html') -> str:
         """Generate complete HTML report"""
         
-        # Process data
         stats = results.get('stats', {})
         scan_results = results.get('results', [])
         
@@ -30,14 +29,12 @@ class HTMLReporter:
             if item.get('status') == 'success':
                 result = item.get('result', {})
                 
-                # Count issues
                 sec_issues = result.get('security_issues', [])
                 qual_issues = result.get('quality_issues', [])
                 total_issues += len(sec_issues) + len(qual_issues)
                 security_issues += len(sec_issues)
                 quality_issues += len(qual_issues)
                 
-                # Store file data
                 files_data.append({
                     'path': item.get('file', 'Unknown'),
                     'language': result.get('language', 'Unknown'),
@@ -49,7 +46,6 @@ class HTMLReporter:
                     'qual_issues': qual_issues
                 })
                 
-                # Store issues with details
                 for issue in sec_issues:
                     issues_list.append({
                         'file': item.get('file'),
@@ -67,10 +63,8 @@ class HTMLReporter:
                         'language': result.get('language', 'Unknown')
                     })
         
-        # Calculate quality score
         quality_score = int((1 - len([f for f in files_data if f['issues'] > 0]) / max(total_files, 1)) * 100)
         
-        # Generate HTML
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         duration = stats.get('duration', 'N/A')
         
@@ -79,7 +73,6 @@ class HTMLReporter:
             quality_score, files_data, issues_list, timestamp, duration
         )
         
-        # Save
         output_path = Path(output_file)
         output_path.parent.mkdir(parents=True, exist_ok=True)
         with open(output_path, 'w', encoding='utf-8') as f:

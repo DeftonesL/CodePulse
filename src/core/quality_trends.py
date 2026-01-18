@@ -69,23 +69,19 @@ class QualityTrendsAnalyzer:
         current = self.history[-1]
         previous = self.history[-2]
         
-        # Calculate changes
         score_change = current.overall_score - previous.overall_score
         lines_change = current.total_lines - previous.total_lines
         
-        # Metric changes
         metric_changes = {}
         for key in current.metrics:
             if key in previous.metrics:
                 metric_changes[key] = current.metrics[key] - previous.metrics[key]
         
-        # Issue changes
         issue_changes = {}
         for severity in current.issues_count:
             if severity in previous.issues_count:
                 issue_changes[severity] = current.issues_count[severity] - previous.issues_count[severity]
         
-        # Determine trend
         if score_change > 5:
             trend = 'improving'
         elif score_change < -5:
@@ -116,7 +112,6 @@ class QualityTrendsAnalyzer:
         scores = [s.overall_score for s in recent]
         avg_score = sum(scores) / len(scores)
         
-        # Calculate linear regression slope
         x_values = list(range(len(scores)))
         x_mean = sum(x_values) / len(x_values)
         y_mean = avg_score
@@ -126,7 +121,6 @@ class QualityTrendsAnalyzer:
         
         slope = numerator / denominator if denominator != 0 else 0
         
-        # Determine trend
         if slope > 0.5:
             trend = 'improving'
         elif slope < -0.5:
@@ -158,7 +152,6 @@ class QualityTrendsAnalyzer:
         
         current = self.history[-1]
         
-        # Best and worst scores
         all_scores = [s.overall_score for s in self.history]
         best_idx = all_scores.index(max(all_scores))
         worst_idx = all_scores.index(min(all_scores))
@@ -201,15 +194,12 @@ class CodebaseGrowthAnalyzer:
         first = self.snapshots[0]
         last = self.snapshots[-1]
         
-        # Growth rates
         files_growth = ((last['files'] - first['files']) / max(first['files'], 1)) * 100
         lines_growth = ((last['lines'] - first['lines']) / max(first['lines'], 1)) * 100
         
-        # Average sizes
         avg_file_size = last['lines'] / max(last['files'], 1)
         avg_functions_per_file = last['functions'] / max(last['files'], 1)
         
-        # Detect issues
         issues = []
         
         if lines_growth > 100:
@@ -241,10 +231,8 @@ class CodebaseGrowthAnalyzer:
 if __name__ == '__main__':
     import sys
     
-    # Example usage
     analyzer = QualityTrendsAnalyzer()
     
-    # Simulate adding snapshot
     if len(sys.argv) > 1 and sys.argv[1] == 'add':
         analyzer.add_snapshot(
             metrics={'complexity': 45.2, 'maintainability': 78.5},
@@ -255,6 +243,5 @@ if __name__ == '__main__':
         )
         print("Snapshot added!")
     
-    # Show summary
     summary = analyzer.get_summary()
     print(json.dumps(summary, indent=2))

@@ -10,17 +10,14 @@ from rich.panel import Panel
 from rich.syntax import Syntax
 import logging
 
-# Import core modules
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from core.scanner import PulseScanner
 from core.ai_engine import AIEngine
 from core.analyzer import ComprehensiveAnalyzer
 from modules.security import SecurityScanner
 
-# Initialize rich console for beautiful output
 console = Console()
 
-# Configure logging
 logging.basicConfig(
     level=logging.WARNING,
     format='%(message)s'
@@ -60,10 +57,8 @@ def scan(project_path, depth, output, verbose):
             
             progress.update(task, completed=True)
         
-        # Display results
         console.print("\n[bold green]✅ Scan Complete![/bold green]\n")
         
-        # Create summary table
         table = Table(title="📊 Project Summary", show_header=True, header_style="bold magenta")
         table.add_column("Metric", style="cyan")
         table.add_column("Value", style="green")
@@ -75,13 +70,11 @@ def scan(project_path, depth, output, verbose):
         
         console.print(table)
         
-        # Language breakdown
         if structure.languages:
             console.print("\n[bold]Language Distribution:[/bold]")
             for lang, count in sorted(structure.languages.items(), key=lambda x: x[1], reverse=True):
                 console.print(f"  • {lang}: [green]{count}[/green] files")
         
-        # Save output if requested
         if output:
             scanner.export_json(output)
             console.print(f"\n[green]📁 Results saved to:[/green] {output}")
@@ -109,14 +102,12 @@ def analyze(project_path, api_key, model, max_files, output):
         console.print("[yellow]⚠️  No API key provided. Using mock analysis.[/yellow]")
     
     try:
-        # First scan the project
         with console.status("[bold green]Scanning project structure..."):
             scanner = PulseScanner(project_path)
             structure = scanner.scan()
         
         console.print("[green]✓[/green] Scan complete\n")
         
-        # Analyze with AI
         ai_engine = AIEngine(api_key=api_key, model=model)
         
         with Progress(
@@ -136,12 +127,10 @@ def analyze(project_path, api_key, model, max_files, output):
                 if file_meta.language != 'Python':
                     continue
                 
-                # Read file
                 file_path = os.path.join(structure.root_path, file_meta.path)
                 with open(file_path, 'r', encoding='utf-8') as f:
                     code = f.read()
                 
-                # Analyze
                 context = {
                     'imports': file_meta.imports,
                     'functions': file_meta.functions,
@@ -155,14 +144,11 @@ def analyze(project_path, api_key, model, max_files, output):
                 analyzed += 1
                 progress.update(task, completed=analyzed, description=f"Analyzing files ({analyzed}/{max_files})...")
         
-        # Display results
         console.print("\n[bold green]✅ Analysis Complete![/bold green]\n")
         
-        # Calculate overall statistics
         total_issues = sum(len(r.issues) for r in results)
         avg_score = sum(r.overall_score for r in results) / len(results) if results else 0
         
-        # Summary table
         table = Table(title="📊 Analysis Summary", show_header=True, header_style="bold magenta")
         table.add_column("Metric", style="cyan")
         table.add_column("Value", style="green")
@@ -174,7 +160,6 @@ def analyze(project_path, api_key, model, max_files, output):
         
         console.print(table)
         
-        # Show top issues
         console.print("\n[bold]🔴 Top Issues:[/bold]")
         issue_count = 0
         for result in results:
@@ -186,7 +171,6 @@ def analyze(project_path, api_key, model, max_files, output):
                 console.print(f"  {issue.description[:100]}...")
                 issue_count += 1
         
-        # Save results
         if output:
             os.makedirs(output, exist_ok=True)
             output_file = os.path.join(output, 'analysis_results.json')
@@ -223,7 +207,6 @@ def security(project_path, output, level):
         ) as progress:
             task = progress.add_task("Scanning for vulnerabilities...", total=None)
             
-            # Scan all Python files
             for root, dirs, files in os.walk(project_path):
                 for file in files:
                     if file.endswith('.py'):
@@ -233,13 +216,10 @@ def security(project_path, output, level):
             
             progress.update(task, completed=True)
         
-        # Generate report
         report = scanner.generate_report(all_issues)
         
-        # Display results
         console.print("\n[bold green]✅ Security Scan Complete![/bold green]\n")
         
-        # Security score with color
         score = report['security_score']
         if score >= 90:
             score_color = "green"
@@ -256,7 +236,6 @@ def security(project_path, output, level):
         
         console.print(f"[bold]Security Score:[/bold] [{score_color}]{score}/100 (Grade: {grade})[/{score_color}]\n")
         
-        # Issues table
         table = Table(title="🚨 Security Issues", show_header=True, header_style="bold red")
         table.add_column("Severity", style="cyan")
         table.add_column("Count", style="yellow")
@@ -267,7 +246,6 @@ def security(project_path, output, level):
         
         console.print(table)
         
-        # Show critical issues
         if report['severity_breakdown']['critical'] > 0:
             console.print("\n[bold red]🔴 CRITICAL ISSUES:[/bold red]")
             for issue_dict in report['issues'][:5]:  # Show first 5
@@ -276,7 +254,6 @@ def security(project_path, output, level):
                     console.print(f"  📁 {issue_dict['file_path']}:{issue_dict['line_number']}")
                     console.print(f"  {issue_dict['description'][:100]}...")
         
-        # Save report
         if output:
             with open(output, 'w') as f:
                 json.dump(report, f, indent=2)
@@ -300,28 +277,22 @@ def comprehensive(project_path, api_key, max_files, output):
     ))
     
     try:
-        # Create analyzer
         with console.status("[bold green]Initializing analyzer..."):
             analyzer = ComprehensiveAnalyzer(project_path, api_key=api_key)
         
-        # Run comprehensive analysis
         with console.status("[bold green]Running comprehensive analysis..."):
             report = analyzer.analyze(max_files_ai=max_files)
         
-        # Print beautiful report
         console.print("\n[bold green]✅ Analysis Complete![/bold green]\n")
         analyzer.print_report(report)
         
-        # Create reports directory
         reports_dir = "reports"
         os.makedirs(reports_dir, exist_ok=True)
         
-        # Save report
         if output:
             analyzer.export_report(report, output)
             console.print(f"\n[green]📁 Full report saved to:[/green] {output}")
         else:
-            # Save to reports directory with timestamp
             from datetime import datetime
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             output_file = os.path.join(reports_dir, f"comprehensive_report_{timestamp}.json")

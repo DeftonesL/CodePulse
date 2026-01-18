@@ -70,7 +70,6 @@ class PerformanceAnalyzer:
                         code_example=f
                     ))
                 
-                # Recurse
                 for child in ast.iter_child_nodes(node):
                     check_node(child, depth + 1)
             else:
@@ -82,14 +81,12 @@ class PerformanceAnalyzer:
     def _detect_inefficient_operations(self, tree: ast.AST, file_path: str):
         
         for node in ast.walk(tree):
-            # List operations in loops
             if isinstance(node, (ast.For, ast.While)):
                 for child in ast.walk(node):
                     if isinstance(child, ast.Call):
                         if isinstance(child.func, ast.Attribute):
                             method = child.func.attr
                             
-                            # String concatenation in loop
                             if method in ['__add__', 'format'] and self._is_in_loop(child, node):
                                 self.issues.append(PerformanceIssue(
                                     type=PerformanceIssueType.INEFFICIENT_LOOP,
@@ -103,11 +100,9 @@ class PerformanceAnalyzer:
                                     code_example=
                                 ))
             
-            # List iteration with index
             if isinstance(node, ast.For):
                 if isinstance(node.iter, ast.Call):
                     if isinstance(node.iter.func, ast.Name) and node.iter.func.id == 'range':
-                        # Check if iterating over list by index
                         for child in ast.walk(node.body[0] if node.body else node):
                             if isinstance(child, ast.Subscript):
                                 self.issues.append(PerformanceIssue(
@@ -126,7 +121,6 @@ class PerformanceAnalyzer:
     def _detect_memory_issues(self, tree: ast.AST, file_path: str):
         
         for node in ast.walk(tree):
-            # Loading entire file into memory
             if isinstance(node, ast.Call):
                 if isinstance(node.func, ast.Attribute):
                     if node.func.attr == 'read' and not node.args:
@@ -142,9 +136,7 @@ class PerformanceAnalyzer:
                             code_example=
                         ))
             
-            # Creating large lists unnecessarily
             if isinstance(node, ast.ListComp):
-                # Check if result is only used in iteration
                 parent = self._get_parent(node, tree)
                 if isinstance(parent, ast.For):
                     self.issues.append(PerformanceIssue(
@@ -162,14 +154,11 @@ class PerformanceAnalyzer:
     def _detect_expensive_operations(self, tree: ast.AST, file_path: str):
         
         for node in ast.walk(tree):
-            # Global lookups in loops
             if isinstance(node, (ast.For, ast.While)):
                 for child in ast.walk(node):
                     if isinstance(child, ast.Call):
-                        # Built-in function calls in loops
                         if isinstance(child.func, ast.Name):
                             if child.func.id in ['len', 'str', 'int', 'float']:
-                                # Check if called on same object repeatedly
                                 self.issues.append(PerformanceIssue(
                                     type=PerformanceIssueType.EXPENSIVE_OPERATION,
                                     severity="LOW",
@@ -183,13 +172,10 @@ class PerformanceAnalyzer:
                                 ))
                                 break
             
-            # Premature optimization (micro-optimizations)
             if isinstance(node, ast.FunctionDef):
-                # Check for overly complex one-liners
                 if len(node.body) == 1:
                     stmt = node.body[0]
                     if isinstance(stmt, ast.Return):
-                        # Very complex expression
                         complexity = self._count_operations(stmt.value)
                         if complexity > 5:
                             self.issues.append(PerformanceIssue(
@@ -249,7 +235,6 @@ class PerformanceAnalyzer:
             ]
         }
 
-# Example usage
 if __name__ == '__main__':
     import sys
     import json

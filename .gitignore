@@ -20,55 +20,39 @@ wheels/
 .installed.cfg
 *.egg
 
-# Virtual environments
+# Virtual Environment
 venv/
-env/
 ENV/
+env/
 .venv
 
-# IDEs
+# IDE
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
-.DS_Store
 
 # Testing
 .pytest_cache/
 .coverage
 htmlcov/
 .tox/
-.hypothesis/
 
-# MyPy
-.mypy_cache/
-.dmypy.json
-dmypy.json
+# Reports
+reports/*.html
+reports/*.json
+reports/*.pdf
+!reports/.gitkeep
 
-# Jupyter
-.ipynb_checkpoints
-
-# Environment variables
+# Environment
 .env
 .env.local
 
-# Reports (except examples)
-reports/*
-!reports/.gitkeep
-
-# Logs
-*.log
-
-# Database
-*.db
-*.sqlite
-
 # OS
-Thumbs.db
 .DS_Store
+Thumbs.db
 
-# Project specific
-scan_results.json
-*.report.html
-*.report.pdf
+# Cache
+.cache/
+*.log

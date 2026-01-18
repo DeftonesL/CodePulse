@@ -64,7 +64,6 @@ class ComplexityMetrics:
     def get_score(self) -> float:
         score = 100
         
-        # Penalize high cyclomatic complexity
         if self.cyclomatic_complexity > 50:
             score -= 30
         elif self.cyclomatic_complexity > 30:
@@ -72,13 +71,11 @@ class ComplexityMetrics:
         elif self.cyclomatic_complexity > 15:
             score -= 10
         
-        # Penalize high cognitive complexity
         if self.cognitive_complexity > 40:
             score -= 25
         elif self.cognitive_complexity > 25:
             score -= 15
         
-        # Penalize deep nesting
         if self.max_nesting_depth > 5:
             score -= 15
         elif self.max_nesting_depth > 3:
@@ -120,12 +117,10 @@ class AdvancedMetricsCalculator:
             
             tree = ast.parse(code)
             
-            # Calculate all metrics
             halstead = self.calculate_halstead_metrics(tree, code)
             complexity = self.calculate_complexity_metrics(tree)
             maintainability = self.calculate_maintainability_metrics(tree, code)
             
-            # Calculate technical debt
             tech_debt = self.estimate_technical_debt(
                 complexity, maintainability, len(code.split('\n'))
             )
@@ -150,7 +145,6 @@ class AdvancedMetricsCalculator:
         operator_count = 0
         operand_count = 0
         
-        # Python operators
         operator_nodes = (
             ast.Add, ast.Sub, ast.Mult, ast.Div, ast.Mod, ast.Pow,
             ast.LShift, ast.RShift, ast.BitOr, ast.BitXor, ast.BitAnd,
@@ -160,22 +154,18 @@ class AdvancedMetricsCalculator:
         )
         
         for node in ast.walk(tree):
-            # Count operators
             if isinstance(node, operator_nodes):
                 operators.add(type(node).__name__)
                 operator_count += 1
             
-            # Function/method calls are operators
             if isinstance(node, ast.Call):
                 operators.add('Call')
                 operator_count += 1
             
-            # Assignments are operators
             if isinstance(node, (ast.Assign, ast.AugAssign)):
                 operators.add('Assign')
                 operator_count += 1
             
-            # Count operands (variables, constants)
             if isinstance(node, ast.Name):
                 operands.add(node.id)
                 operand_count += 1
@@ -197,7 +187,6 @@ class AdvancedMetricsCalculator:
         essential = self._calculate_essential_complexity(tree)
         max_depth = self._calculate_max_nesting_depth(tree)
         
-        # Calculate average per function
         function_count = sum(1 for _ in ast.walk(tree) if isinstance(_, ast.FunctionDef))
         avg_complexity = cyclomatic / max(function_count, 1)
         
@@ -221,7 +210,6 @@ class AdvancedMetricsCalculator:
             if isinstance(node, decision_points):
                 complexity += 1
             
-            # Each elif adds complexity
             if isinstance(node, ast.If) and node.orelse:
                 if isinstance(node.orelse[0], ast.If):
                     complexity += 1
@@ -235,19 +223,15 @@ class AdvancedMetricsCalculator:
         def visit_node(node, depth=0):
             nonlocal complexity, nesting_level
             
-            # Nesting increments
             if isinstance(node, (ast.If, ast.While, ast.For)):
                 complexity += (1 + depth)
                 depth += 1
             
-            # Logical operators add complexity
             if isinstance(node, ast.BoolOp):
                 complexity += len(node.values) - 1
             
-            # Recursion adds complexity
             if isinstance(node, ast.Call):
                 if isinstance(node.func, ast.Name):
-                    # Check if recursive (simplified check)
                     complexity += 1
             
             for child in ast.iter_child_nodes(node):
@@ -257,15 +241,12 @@ class AdvancedMetricsCalculator:
         return complexity
     
     def _calculate_essential_complexity(self, tree: ast.AST) -> int:
-        # Simplified: count goto-like patterns
         complexity = 1
         
         for node in ast.walk(tree):
-            # Break/continue in loops
             if isinstance(node, (ast.Break, ast.Continue)):
                 complexity += 1
             
-            # Multiple returns
             if isinstance(node, ast.Return):
                 complexity += 1
         
@@ -292,17 +273,14 @@ class AdvancedMetricsCalculator:
     ) -> MaintainabilityMetrics:
         lines = code.split('\n')
         
-        # Count comments
         comment_lines = sum(1 for line in lines if line.strip().startswith('#'))
         
-        # Count docstrings
         docstring_count = 0
         for node in ast.walk(tree):
             if isinstance(node, (ast.FunctionDef, ast.ClassDef, ast.Module)):
                 if (ast.get_docstring(node)):
                     docstring_count += 1
         
-        # Calculate ratios
         total_lines = len(lines)
         code_lines = sum(1 for line in lines if line.strip() and not line.strip().startswith('#'))
         
@@ -312,7 +290,6 @@ class AdvancedMetricsCalculator:
             1
         )
         
-        # Calculate maintainability index
         
         halstead = self.calculate_halstead_metrics(tree, code)
         complexity = self._calculate_cyclomatic_complexity(tree)
@@ -328,7 +305,6 @@ class AdvancedMetricsCalculator:
         else:
             mi = 50  # Default
         
-        # Estimate test coverage (simplified)
         test_count = sum(1 for node in ast.walk(tree) 
                         if isinstance(node, ast.FunctionDef) 
                         and node.name.startswith('test_'))
@@ -357,11 +333,9 @@ class AdvancedMetricsCalculator:
         if complexity.cognitive_complexity > 15:
             debt += (complexity.cognitive_complexity - 15) * 3
         
-        # Maintainability debt
         if maintainability.maintainability_index < 65:
             debt += (65 - maintainability.maintainability_index) * 2
         
-        # Documentation debt
         if maintainability.documentation_ratio < 0.5:
             debt += (0.5 - maintainability.documentation_ratio) * 100
         
@@ -375,16 +349,13 @@ class AdvancedMetricsCalculator:
         complexity: ComplexityMetrics,
         maintainability: MaintainabilityMetrics
     ) -> float:
-        # Weighted average
         complexity_score = complexity.get_score()
         maintainability_score = maintainability.maintainability_index
         
-        # 40% complexity, 60% maintainability
         overall = (complexity_score * 0.4) + (maintainability_score * 0.6)
         
         return round(overall, 2)
 
-# Example usage
 if __name__ == '__main__':
     import sys
     

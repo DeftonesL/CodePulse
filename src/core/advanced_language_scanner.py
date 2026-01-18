@@ -23,7 +23,6 @@ class SecurityIssue:
 class LanguagePatterns:
     pass
     
-    # Common patterns across languages
     COMMON = {
         'sql_injection': [
             (r'(execute|exec)\s*\([^)]*\+', 'SQL Injection via concatenation'),
@@ -48,7 +47,6 @@ class LanguagePatterns:
         ],
     }
     
-    # JavaScript/TypeScript specific
     JAVASCRIPT = {
         'dangerous_functions': [
             (r'eval\s*\(', 'eval() - code injection', 'CRITICAL'),
@@ -68,7 +66,6 @@ class LanguagePatterns:
         ],
     }
     
-    # PHP specific
     PHP = {
         'dangerous_functions': [
             (r'eval\s*\(', 'eval() - code injection', 'CRITICAL'),
@@ -91,7 +88,6 @@ class LanguagePatterns:
         ],
     }
     
-    # Java specific
     JAVA = {
         'dangerous_functions': [
             (r'Runtime\.getRuntime\(\)\.exec', 'Runtime.exec - command injection', 'CRITICAL'),
@@ -108,7 +104,6 @@ class LanguagePatterns:
         ],
     }
     
-    # C# specific
     CSHARP = {
         'dangerous_functions': [
             (r'Process\.Start\s*\(', 'Process.Start - command injection risk', 'HIGH'),
@@ -121,7 +116,6 @@ class LanguagePatterns:
         ],
     }
     
-    # Go specific
     GO = {
         'dangerous_functions': [
             (r'exec\.Command\s*\(', 'exec.Command - command injection risk', 'HIGH'),
@@ -144,7 +138,6 @@ class AdvancedLanguageScanner:
     def scan_file(self, file_path: str) -> Dict[str, Any]:
         ext = os.path.splitext(file_path)[1].lower()
         
-        # Determine language
         language_map = {
             '.js': 'JavaScript',
             '.jsx': 'JavaScript',
@@ -174,7 +167,6 @@ class AdvancedLanguageScanner:
         except Exception as e:
             return {'error': str(e)}
         
-        # Scan based on language
         if language in ['JavaScript', 'TypeScript']:
             self._scan_javascript(lines, file_path, language)
         elif language == 'PHP':
@@ -186,10 +178,8 @@ class AdvancedLanguageScanner:
         elif language == 'Go':
             self._scan_go(lines, file_path)
         
-        # Common patterns for all languages
         self._scan_common(lines, file_path, language)
         
-        # Calculate score
         score = self._calculate_score()
         
         return {
@@ -205,18 +195,15 @@ class AdvancedLanguageScanner:
         for i, line in enumerate(lines, 1):
             stripped = line.strip()
             
-            # Skip comments
             if stripped.startswith('//') or stripped.startswith('/*') or stripped.startswith('*'):
                 continue
             
             if "includes('eval" in stripped or '"eval' in stripped or "'eval" in stripped:
                 continue
             
-            # Skip documentation/examples
             if 'example' in stripped.lower() or 'avoid' in stripped.lower():
                 continue
             
-            # Dangerous functions
             for pattern, desc, severity in self.patterns.JAVASCRIPT['dangerous_functions']:
                 if re.search(pattern, stripped, re.IGNORECASE):
                     self.issues.append(SecurityIssue(
@@ -232,7 +219,6 @@ class AdvancedLanguageScanner:
                         language=language
                     ))
             
-            # DOM XSS
             for pattern, desc, severity in self.patterns.JAVASCRIPT['dom_xss']:
                 if re.search(pattern, stripped):
                     if '.test(' in stripped or 'includes(' in stripped:
@@ -251,7 +237,6 @@ class AdvancedLanguageScanner:
                         language=language
                     ))
             
-            # Storage
             for pattern, desc, severity in self.patterns.JAVASCRIPT['storage']:
                 if re.search(pattern, line):
                     self.issues.append(SecurityIssue(
@@ -269,7 +254,6 @@ class AdvancedLanguageScanner:
     
     def _scan_php(self, lines: List[str], file_path: str):
         for i, line in enumerate(lines, 1):
-            # Dangerous functions
             for pattern, desc, severity in self.patterns.PHP['dangerous_functions']:
                 if re.search(pattern, line):
                     self.issues.append(SecurityIssue(
@@ -285,7 +269,6 @@ class AdvancedLanguageScanner:
                         language='PHP'
                     ))
             
-            # File inclusion
             for pattern, desc, severity in self.patterns.PHP['file_inclusion']:
                 if re.search(pattern, line):
                     self.issues.append(SecurityIssue(
@@ -301,7 +284,6 @@ class AdvancedLanguageScanner:
                         language='PHP'
                     ))
             
-            # SQL injection
             for pattern, desc, severity in self.patterns.PHP['sql']:
                 if re.search(pattern, line):
                     self.issues.append(SecurityIssue(
@@ -319,7 +301,6 @@ class AdvancedLanguageScanner:
     
     def _scan_java(self, lines: List[str], file_path: str):
         for i, line in enumerate(lines, 1):
-            # Dangerous functions
             for pattern, desc, severity in self.patterns.JAVA['dangerous_functions']:
                 if re.search(pattern, line):
                     self.issues.append(SecurityIssue(
@@ -335,7 +316,6 @@ class AdvancedLanguageScanner:
                         language='Java'
                     ))
             
-            # Deserialization
             for pattern, desc, severity in self.patterns.JAVA['deserialization']:
                 if re.search(pattern, line):
                     self.issues.append(SecurityIssue(
@@ -353,7 +333,6 @@ class AdvancedLanguageScanner:
     
     def _scan_csharp(self, lines: List[str], file_path: str):
         for i, line in enumerate(lines, 1):
-            # Dangerous functions
             for pattern, desc, severity in self.patterns.CSHARP['dangerous_functions']:
                 if re.search(pattern, line):
                     self.issues.append(SecurityIssue(
@@ -369,7 +348,6 @@ class AdvancedLanguageScanner:
                         language='C#'
                     ))
             
-            # Deserialization
             for pattern, desc, severity in self.patterns.CSHARP['deserialization']:
                 if re.search(pattern, line):
                     self.issues.append(SecurityIssue(
@@ -387,7 +365,6 @@ class AdvancedLanguageScanner:
     
     def _scan_go(self, lines: List[str], file_path: str):
         for i, line in enumerate(lines, 1):
-            # Dangerous functions
             for pattern, desc, severity in self.patterns.GO['dangerous_functions']:
                 if re.search(pattern, line):
                     self.issues.append(SecurityIssue(
@@ -403,7 +380,6 @@ class AdvancedLanguageScanner:
                         language='Go'
                     ))
             
-            # SQL
             for pattern, desc, severity in self.patterns.GO['sql']:
                 if re.search(pattern, line):
                     self.issues.append(SecurityIssue(
@@ -421,7 +397,6 @@ class AdvancedLanguageScanner:
     
     def _scan_common(self, lines: List[str], file_path: str, language: str):
         for i, line in enumerate(lines, 1):
-            # SQL injection
             for pattern, desc in self.patterns.COMMON['sql_injection']:
                 if re.search(pattern, line, re.IGNORECASE):
                     self.issues.append(SecurityIssue(
@@ -437,10 +412,8 @@ class AdvancedLanguageScanner:
                         language=language
                     ))
             
-            # Hardcoded secrets
             for pattern, desc in self.patterns.COMMON['hardcoded_secrets']:
                 if re.search(pattern, line, re.IGNORECASE):
-                    # Avoid false positives
                     if 'example' not in line.lower() and 'placeholder' not in line.lower():
                         self.issues.append(SecurityIssue(
                             type='Hardcoded Secret',

@@ -31,7 +31,6 @@ class IntelligentSmellDetector:
         'flask', 'django', 'numpy', 'pandas', 'matplotlib', 'seaborn', 'result',
     }
     
-    # Relaxed thresholds for more realistic detection
     LONG_METHOD_THRESHOLD = 80  # More realistic (was 50)
     LARGE_CLASS_THRESHOLD = 500  # More realistic (was 200)
     LONG_PARAMETER_LIST = 6  # Reasonable (was 5)
@@ -49,10 +48,8 @@ class IntelligentSmellDetector:
         except:
             return []
         
-        # Calculate file-level metrics first
         self._calculate_file_metrics(tree, code)
         
-        # Detect different types of smells
         self._detect_bloater_smells(tree, file_path)
         self._detect_oo_abuser_smells(tree, file_path)
         self._detect_change_preventer_smells(tree, file_path)
@@ -101,7 +98,6 @@ class IntelligentSmellDetector:
     def _detect_bloater_smells(self, tree: ast.AST, file_path: str):
         for node in ast.walk(tree):
             if isinstance(node, ast.FunctionDef):
-                # Long Method - using relaxed threshold
                 length = (node.end_lineno or node.lineno) - node.lineno
                 if length > self.LONG_METHOD_THRESHOLD:
                     self.smells.append(CodeSmell(
@@ -116,7 +112,6 @@ class IntelligentSmellDetector:
                         code_example=f
                     ))
                 
-                # Long Parameter List - using relaxed threshold
                 param_count = len(node.args.args)
                 if param_count > self.LONG_PARAMETER_LIST:
                     self.smells.append(CodeSmell(
@@ -132,7 +127,6 @@ class IntelligentSmellDetector:
                     ))
             
             elif isinstance(node, ast.ClassDef):
-                # Large Class - using relaxed threshold
                 size = (node.end_lineno or node.lineno) - node.lineno
                 methods = [n for n in node.body if isinstance(n, ast.FunctionDef)]
                 
@@ -183,12 +177,10 @@ class IntelligentSmellDetector:
     def _detect_change_preventer_smells(self, tree: ast.AST, file_path: str):
         for node in ast.walk(tree):
             if isinstance(node, ast.ClassDef):
-                # Count different types of operations
                 operation_types = set()
                 
                 for child in node.body:
                     if isinstance(child, ast.FunctionDef):
-                        # Categorize by name patterns
                         name = child.name.lower()
                         if 'get' in name or 'set' in name:
                             operation_types.add('accessors')
@@ -216,7 +208,6 @@ class IntelligentSmellDetector:
     
     def _detect_dispensable_smells(self, tree: ast.AST, file_path: str):
         for node in ast.walk(tree):
-            # Lazy Class (class that doesn't do enough)
             if isinstance(node, ast.ClassDef):
                 methods = [n for n in node.body if isinstance(n, ast.FunctionDef)]
                 real_methods = [m for m in methods if m.name not in ['__init__', '__str__', '__repr__']]
@@ -237,7 +228,6 @@ class IntelligentSmellDetector:
     def _detect_coupler_smells(self, tree: ast.AST, file_path: str):
         for node in ast.walk(tree):
             if isinstance(node, ast.FunctionDef):
-                # Count self vs other access
                 self_access = 0
                 other_access = defaultdict(int)
                 
@@ -249,9 +239,7 @@ class IntelligentSmellDetector:
                             else:
                                 other_access[child.value.id] += 1
                 
-                # Check for envy - but ignore standard modules
                 for other_obj, count in other_access.items():
-                    # Skip if it's a standard module
                     if other_obj.lower() in self.STANDARD_MODULES:
                         continue
                     
@@ -281,11 +269,9 @@ class IntelligentSmellDetector:
                 'recommendations': ['No code smells detected! Excellent code quality.']
             }
         
-        # Categorize
         by_severity = Counter(s.severity for s in self.smells)
         by_category = Counter(s.category for s in self.smells)
         
-        # Calculate health score
         score = 100.0
         for smell in self.smells:
             if smell.severity == 'CRITICAL':
@@ -299,7 +285,6 @@ class IntelligentSmellDetector:
         
         score = max(0, score)
         
-        # Generate recommendations
         recommendations = []
         
         if by_severity['HIGH'] > 0 or by_severity.get('CRITICAL', 0) > 0:
@@ -338,7 +323,6 @@ class IntelligentSmellDetector:
             'metrics': self.metrics
         }
 
-# Example usage
 if __name__ == '__main__':
     import sys
     import json

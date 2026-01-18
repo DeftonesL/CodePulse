@@ -30,7 +30,6 @@ class HTMLScanner:
         except:
             return []
         
-        # Check for XSS vulnerabilities
         self._check_inline_scripts(lines, file_path)
         self._check_dangerous_attributes(lines, file_path)
         self._check_external_resources(lines, file_path)
@@ -80,7 +79,6 @@ class HTMLScanner:
     
     def _check_external_resources(self, lines: List[str], file_path: str):
         for i, line in enumerate(lines, 1):
-            # HTTP resources (should be HTTPS)
             if re.search(r'(src|href)\s*=\s*["\']http://', line, re.IGNORECASE):
                 self.issues.append(SecurityIssue(
                     type='Insecure Resource',
@@ -91,7 +89,6 @@ class HTMLScanner:
                     recommendation='Use HTTPS for all external resources to prevent MITM attacks'
                 ))
             
-            # CDN without SRI
             if 'cdn' in line.lower() and 'integrity=' not in line:
                 self.issues.append(SecurityIssue(
                     type='Missing SRI',
@@ -105,7 +102,6 @@ class HTMLScanner:
     def _check_form_security(self, lines: List[str], file_path: str):
         for i, line in enumerate(lines, 1):
             if '<form' in line.lower():
-                # Check for CSRF token
                 form_block = '\n'.join(lines[i-1:min(i+10, len(lines))])
                 
                 if 'action=' in form_block and 'csrf' not in form_block.lower():
@@ -118,7 +114,6 @@ class HTMLScanner:
                         recommendation='Add CSRF token to all forms that modify data'
                     ))
                 
-                # Check for autocomplete on sensitive fields
                 if 'password' in form_block.lower() and 'autocomplete="off"' not in form_block:
                     self.issues.append(SecurityIssue(
                         type='Autocomplete on Password',
@@ -145,7 +140,6 @@ class HTMLScanner:
     def _check_meta_tags(self, lines: List[str], file_path: str):
         content = '\n'.join(lines)
         
-        # Check for CSP
         if 'Content-Security-Policy' not in content:
             self.issues.append(SecurityIssue(
                 type='Missing CSP',
@@ -156,7 +150,6 @@ class HTMLScanner:
                 recommendation='Add CSP meta tag to prevent XSS: <meta http-equiv="Content-Security-Policy" content="default-src \'self\'">'
             ))
         
-        # Check for X-Frame-Options
         if 'X-Frame-Options' not in content and '<iframe' in content:
             self.issues.append(SecurityIssue(
                 type='Missing X-Frame-Options',
@@ -182,7 +175,6 @@ class JSONScanner:
         except:
             return []
         
-        # Check syntax
         try:
             data = json.loads(content)
             self._check_sensitive_data(data, file_path)
@@ -197,7 +189,6 @@ class JSONScanner:
                 recommendation=f'Fix JSON syntax at line {e.lineno}, column {e.colno}'
             ))
         
-        # Check for secrets in raw content
         self._check_secrets(content, file_path)
         
         return self.issues
@@ -210,7 +201,6 @@ class JSONScanner:
                 for key, value in d.items():
                     current_path = f"{path}.{key}" if path else key
                     
-                    # Check key names
                     for sensitive in sensitive_keys:
                         if sensitive in key.lower():
                             self.issues.append(SecurityIssue(
@@ -231,7 +221,6 @@ class JSONScanner:
     
     def _check_structure(self, data: Any, file_path: str):
         if isinstance(data, dict):
-            # Very large objects
             if len(str(data)) > 1000000:  # 1MB
                 self.issues.append(SecurityIssue(
                     type='Large JSON Object',
@@ -309,7 +298,6 @@ class SQLScanner:
     
     def _check_dangerous_operations(self, lines: List[str], file_path: str):
         for i, line in enumerate(lines, 1):
-            # DROP DATABASE
             if re.search(r'DROP\s+DATABASE', line, re.IGNORECASE):
                 self.issues.append(SecurityIssue(
                     type='DROP DATABASE',
@@ -320,7 +308,6 @@ class SQLScanner:
                     recommendation='Ensure this is intentional and has proper safeguards'
                 ))
             
-            # TRUNCATE
             if re.search(r'TRUNCATE\s+TABLE', line, re.IGNORECASE):
                 self.issues.append(SecurityIssue(
                     type='TRUNCATE TABLE',
@@ -331,7 +318,6 @@ class SQLScanner:
                     recommendation='Ensure backup exists before truncating'
                 ))
             
-            # SELECT *
             if re.search(r'SELECT\s+\*\s+FROM', line, re.IGNORECASE):
                 self.issues.append(SecurityIssue(
                     type='SELECT *',
@@ -344,7 +330,6 @@ class SQLScanner:
     
     def _check_authentication(self, lines: List[str], file_path: str):
         for i, line in enumerate(lines, 1):
-            # Hardcoded passwords
             if re.search(r'PASSWORD\s*=\s*[\'"][^\'"]+[\'"]', line, re.IGNORECASE):
                 self.issues.append(SecurityIssue(
                     type='Hardcoded Password',
@@ -355,7 +340,6 @@ class SQLScanner:
                     recommendation='Use environment variables or secure configuration'
                 ))
             
-            # Weak password storage
             if re.search(r'PASSWORD\s*,\s*VARCHAR', line, re.IGNORECASE):
                 if 'HASH' not in line.upper() and 'ENCRYPT' not in line.upper():
                     self.issues.append(SecurityIssue(
@@ -369,7 +353,6 @@ class SQLScanner:
     
     def _check_permissions(self, lines: List[str], file_path: str):
         for i, line in enumerate(lines, 1):
-            # GRANT ALL
             if re.search(r'GRANT\s+ALL', line, re.IGNORECASE):
                 self.issues.append(SecurityIssue(
                     type='Excessive Permissions',
@@ -380,7 +363,6 @@ class SQLScanner:
                     recommendation='Grant only necessary permissions (principle of least privilege)'
                 ))
             
-            # Public access
             if re.search(r'TO\s+PUBLIC', line, re.IGNORECASE):
                 self.issues.append(SecurityIssue(
                     type='Public Access',
@@ -415,7 +397,6 @@ class MultiFormatScanner:
             issues = self.sql_scanner.scan(file_path)
             file_type = 'SQL'
         
-        # Convert to dict
         issues_dict = [
             {
                 'type': i.type,
@@ -428,7 +409,6 @@ class MultiFormatScanner:
             for i in issues
         ]
         
-        # Calculate score
         score = 100.0
         for issue in issues:
             if issue.severity == 'CRITICAL':

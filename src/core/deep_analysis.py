@@ -40,12 +40,10 @@ class DeepAnalysisEngine:
         
         tree = ast.parse(code)
         
-        # Build graphs
         self.build_control_flow_graph(tree)
         self.build_data_flow_graph(tree)
         self.build_call_graph(tree)
         
-        # Analyze graphs
         results = {
             'control_flow_analysis': self._analyze_control_flow(),
             'data_flow_analysis': self._analyze_data_flow(),
@@ -55,7 +53,6 @@ class DeepAnalysisEngine:
             'code_quality_score': 0.0  # Will be calculated
         }
         
-        # Calculate overall quality score
         results['code_quality_score'] = self._calculate_quality_score(results)
         
         return results
@@ -68,50 +65,40 @@ class DeepAnalysisEngine:
             current_id = self.node_counter
             self.node_counter += 1
             
-            # Add node to graph
             self.cfg.add_node(current_id, 
                             type=type(node).__name__,
                             line=getattr(node, 'lineno', 0))
             
-            # Connect to parent
             if parent_id is not None:
                 self.cfg.add_edge(parent_id, current_id)
             
-            # Handle control flow structures
             if isinstance(node, ast.If):
-                # True branch
                 true_branch_id = self.node_counter
                 for stmt in node.body:
                     visit_node(stmt, current_id)
                 
-                # False branch (else)
                 if node.orelse:
                     false_branch_id = self.node_counter
                     for stmt in node.orelse:
                         visit_node(stmt, current_id)
             
             elif isinstance(node, (ast.While, ast.For)):
-                # Loop body
                 loop_body_id = self.node_counter
                 for stmt in node.body:
                     visit_node(stmt, current_id)
                 
-                # Add back edge (loop)
                 if loop_body_id < self.node_counter:
                     self.cfg.add_edge(self.node_counter - 1, current_id)
             
             elif isinstance(node, ast.Try):
-                # Try block
                 for stmt in node.body:
                     visit_node(stmt, current_id)
                 
-                # Exception handlers
                 for handler in node.handlers:
                     for stmt in handler.body:
                         visit_node(stmt, current_id)
             
             else:
-                # Regular statement
                 for child in ast.iter_child_nodes(node):
                     visit_node(child, current_id)
             
@@ -132,12 +119,10 @@ class DeepAnalysisEngine:
                 self.uses = use
             
             def visit_Assign(self, node):
-                # Variable definition
                 for target in node.targets:
                     if isinstance(target, ast.Name):
                         self.definitions[target.id].append(node.lineno)
                 
-                # Right side uses
                 for child in ast.walk(node.value):
                     if isinstance(child, ast.Name):
                         self.uses[child.id].append(node.lineno)
@@ -153,18 +138,15 @@ class DeepAnalysisEngine:
         visitor = DataFlowVisitor(definitions, uses)
         visitor.visit(tree)
         
-        # Build graph
         for var in set(list(definitions.keys()) + list(uses.keys())):
             self.dfg.add_node(var, 
                             definitions=definitions[var],
                             uses=uses[var])
         
-        # Add edges for data dependencies
         for var in definitions:
             for def_line in definitions[var]:
                 for use_line in uses[var]:
                     if use_line > def_line:
-                        # Data flows from definition to use
                         self.dfg.add_edge(f"{var}@{def_line}", 
                                         f"{var}@{use_line}")
     
@@ -173,13 +155,11 @@ class DeepAnalysisEngine:
         
         functions = {}  # name -> node
         
-        # Find all function definitions
         for node in ast.walk(tree):
             if isinstance(node, ast.FunctionDef):
                 functions[node.name] = node
                 self.call_graph.add_node(node.name)
         
-        # Find calls
         for func_name, func_node in functions.items():
             for node in ast.walk(func_node):
                 if isinstance(node, ast.Call):
@@ -191,7 +171,6 @@ class DeepAnalysisEngine:
     def _analyze_control_flow(self) -> Dict[str, Any]:
         issues = []
         
-        # Find unreachable nodes
         if self.cfg.nodes():
             root_nodes = [n for n in self.cfg.nodes() if self.cfg.in_degree(n) == 0]
             if root_nodes:
@@ -208,11 +187,9 @@ class DeepAnalysisEngine:
                         'message': f'Found {len(unreachable)} unreachable code blocks'
                     })
         
-        # Detect infinite loops
         try:
             cycles = list(nx.simple_cycles(self.cfg))
             for cycle in cycles:
-                # Check if there's an exit from the cycle
                 has_exit = False
                 for node in cycle:
                     successors = list(self.cfg.successors(node))
@@ -227,10 +204,8 @@ class DeepAnalysisEngine:
                         'message': 'Detected potential infinite loop'
                     })
         except (ValueError, TypeError, KeyError) as e:
-            # Log error but continue analysis
             pass
         
-        # Analyze branching complexity
         branch_nodes = [n for n in self.cfg.nodes() 
                        if self.cfg.out_degree(n) > 1]
         
@@ -256,7 +231,6 @@ class DeepAnalysisEngine:
             definitions = data.get('definitions', [])
             uses = data.get('uses', [])
             
-            # Unused variable
             if definitions and not uses:
                 issues.append({
                     'type': 'unused_variable',
@@ -265,7 +239,6 @@ class DeepAnalysisEngine:
                     'message': f'Variable "{var}" defined but never used'
                 })
             
-            # Used before definition
             if uses and definitions:
                 first_use = min(uses)
                 first_def = min(definitions)
@@ -284,18 +257,15 @@ class DeepAnalysisEngine:
         }
     
     def _analyze_structure(self, tree: ast.AST) -> Dict[str, Any]:
-        # Count different node types
         node_counts = defaultdict(int)
         for node in ast.walk(tree):
             node_counts[type(node).__name__] += 1
         
-        # Calculate structural metrics
         functions = node_counts.get('FunctionDef', 0)
         classes = node_counts.get('ClassDef', 0)
         loops = node_counts.get('For', 0) + node_counts.get('While', 0)
         conditions = node_counts.get('If', 0)
         
-        # My own formula based on code structure
         sci = (
             functions * 1.0 +
             classes * 2.0 +
@@ -315,7 +285,6 @@ class DeepAnalysisEngine:
     def _analyze_dependencies(self) -> Dict[str, Any]:
         issues = []
         
-        # Find circular dependencies
         try:
             cycles = list(nx.simple_cycles(self.call_graph))
             if cycles:
@@ -328,7 +297,6 @@ class DeepAnalysisEngine:
         except (ValueError, TypeError, AttributeError) as e:
             cycles = []
         
-        # Calculate coupling metrics
         if self.call_graph.nodes():
             avg_coupling = sum(self.call_graph.degree(n) 
                              for n in self.call_graph.nodes()) / self.call_graph.number_of_nodes()
@@ -342,7 +310,6 @@ class DeepAnalysisEngine:
         else:
             avg_coupling = 0
         
-        # Calculate dependency depth
         try:
             if self.call_graph.nodes():
                 longest_path = max(
@@ -365,7 +332,6 @@ class DeepAnalysisEngine:
         }
     
     def _calculate_advanced_complexity(self) -> Dict[str, Any]:
-        # Graph complexity metrics
         if self.cfg.nodes():
             graph_complexity = (
                 self.cfg.number_of_edges() / 
@@ -374,7 +340,6 @@ class DeepAnalysisEngine:
         else:
             graph_complexity = 0
         
-        # Information flow complexity
         if self.dfg.nodes():
             info_flow_complexity = (
                 self.dfg.number_of_edges() / 
@@ -383,13 +348,11 @@ class DeepAnalysisEngine:
         else:
             info_flow_complexity = 0
         
-        # Call depth complexity
         if self.call_graph.nodes():
             call_depth = nx.dag_longest_path_length(self.call_graph) if nx.is_directed_acyclic_graph(self.call_graph) else 0
         else:
             call_depth = 0
         
-        # Combined complexity score (my formula)
         combined = (
             graph_complexity * 0.4 +
             info_flow_complexity * 0.3 +
@@ -406,7 +369,6 @@ class DeepAnalysisEngine:
     def _calculate_quality_score(self, results: Dict) -> float:
         score = 100.0
         
-        # Penalize based on issues
         for analysis in ['control_flow_analysis', 'data_flow_analysis', 'dependency_analysis']:
             if analysis in results:
                 issues = results[analysis].get('issues', [])
@@ -418,14 +380,12 @@ class DeepAnalysisEngine:
                     elif issue['severity'] == 'info':
                         score -= 2
         
-        # Penalize based on complexity
         complexity = results.get('complexity_metrics', {})
         combined = complexity.get('combined_complexity_score', 0)
         
         if combined > 5:
             score -= (combined - 5) * 5
         
-        # Penalize based on coupling
         deps = results.get('dependency_analysis', {})
         coupling = deps.get('average_coupling', 0)
         
@@ -434,7 +394,6 @@ class DeepAnalysisEngine:
         
         return max(0, min(100, score))
 
-# Example usage
 if __name__ == '__main__':
     import sys
     import json

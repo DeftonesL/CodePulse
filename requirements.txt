@@ -1,20 +1,25 @@
 # CodePulse Requirements
-# Core dependencies
+# Minimal dependencies for clean installation
 
-# Essential
-click>=8.0.0
-rich>=13.0.0
-networkx>=3.0
-jinja2>=3.1.0
+# ============================================
+# Core Dependencies (Required)
+# ============================================
+click>=8.0.0          # CLI framework
+rich>=13.0.0          # Beautiful terminal output
+networkx>=3.0         # Graph analysis
+jinja2>=3.1.0         # HTML report templates
 
-# Testing
-pytest>=8.0.0
-pytest-cov>=4.1.0
+# ============================================
+# Development & Testing (Optional)
+# ============================================
+pytest>=8.0.0         # Testing framework
+pytest-cov>=4.1.0     # Coverage reports
+black>=24.0.0         # Code formatting
+mypy>=1.8.0           # Type checking
 
-# Code Quality
-black>=24.0.0
-mypy>=1.8.0
-
-# Optional AI
-# anthropic>=0.18.0
-# openai>=1.0.0
+# ============================================
+# AI Features (Optional)
+# ============================================
+# Uncomment to enable AI-powered analysis
+# anthropic>=0.40.0   # Claude AI integration
+# openai>=1.0.0       # OpenAI GPT integration

@@ -29,11 +29,9 @@ class ArchitectureAnalyzer:
     def analyze_project(self, root_path: str) -> Dict[str, Any]:
         python_files = self._find_python_files(root_path)
         
-        # Build graphs
         self._build_dependency_graph(python_files)
         self._build_module_graph(python_files)
         
-        # Detect issues
         self._detect_circular_dependencies()
         self._detect_god_modules()
         self._detect_unstable_dependencies()
@@ -76,12 +74,10 @@ class ArchitectureAnalyzer:
                 
                 self.dependency_graph.add_node(file_path)
                 
-                # Extract imports
                 for node in ast.walk(tree):
                     if isinstance(node, (ast.Import, ast.ImportFrom)):
                         imported_modules = self._extract_imports(node)
                         for module in imported_modules:
-                            # Try to resolve to file
                             resolved = self._resolve_import(module, file_path, files)
                             if resolved:
                                 self.dependency_graph.add_edge(file_path, resolved)
@@ -96,7 +92,6 @@ class ArchitectureAnalyzer:
             modules[module_name].append(file_path)
             self.module_graph.add_node(module_name)
         
-        # Add edges based on file dependencies
         for src, dst in self.dependency_graph.edges():
             src_module = self._get_module_name(src)
             dst_module = self._get_module_name(dst)
@@ -116,13 +111,11 @@ class ArchitectureAnalyzer:
     def _resolve_import(self, module: str, current_file: str, all_files: List[str]) -> str:
         current_dir = os.path.dirname(current_file)
         
-        # Relative import
         if module.startswith('.'):
             module_path = os.path.join(current_dir, module.replace('.', '/') + '.py')
             if module_path in all_files:
                 return module_path
         
-        # Absolute import within project
         for file_path in all_files:
             if module.replace('.', '/') in file_path:
                 return file_path
@@ -191,7 +184,6 @@ class ArchitectureAnalyzer:
             src_stability = stabilities.get(src, 0.5)
             dst_stability = stabilities.get(dst, 0.5)
             
-            # Stable (low I) depending on unstable (high I)
             if src_stability < 0.3 and dst_stability > 0.7:
                 self.issues.append(CrossFileIssue(
                     type="Unstable Dependency",
@@ -205,12 +197,10 @@ class ArchitectureAnalyzer:
     
     def _detect_feature_clusters(self):
         try:
-            # Find strongly connected components
             components = list(nx.strongly_connected_components(self.dependency_graph))
             
             for component in components:
                 if len(component) >= 5:  # At least 5 files
-                    # Check if isolated from rest
                     external_deps = 0
                     for node in component:
                         for neighbor in self.dependency_graph.successors(node):
@@ -230,7 +220,6 @@ class ArchitectureAnalyzer:
             pass
     
     def _calculate_architecture_metrics(self):
-        # Modularity
         try:
             modularity = nx.algorithms.community.modularity(
                 self.module_graph.to_undirected(),
@@ -241,13 +230,11 @@ class ArchitectureAnalyzer:
         except:
             modularity = 0.0
         
-        # Average clustering coefficient
         try:
             clustering = nx.average_clustering(self.dependency_graph.to_undirected())
         except:
             clustering = 0.0
         
-        # Density
         density = nx.density(self.dependency_graph)
         
         self.metrics = {
@@ -262,7 +249,6 @@ class ArchitectureAnalyzer:
     def _calculate_architecture_score(self) -> float:
         score = 100.0
         
-        # Penalize based on issues
         for issue in self.issues:
             if issue.severity == 'HIGH':
                 score -= 15
@@ -271,12 +257,10 @@ class ArchitectureAnalyzer:
             elif issue.severity == 'LOW':
                 score -= 3
         
-        # Bonus for good modularity
         modularity = self.metrics.get('modularity', 0)
         if modularity > 0.5:
             score += 10
         
-        # Penalize high density (too coupled)
         density = self.metrics.get('density', 0)
         if density > 0.3:
             score -= density * 20
@@ -293,7 +277,6 @@ class CodeDuplicationAnalyzer:
     def analyze_duplication(self, files: List[str]) -> Dict[str, Any]:
         file_hashes = {}
         
-        # Hash code blocks from all files
         for file_path in files:
             try:
                 with open(file_path, 'r', encoding='utf-8') as f:
@@ -303,13 +286,11 @@ class CodeDuplicationAnalyzer:
             except:
                 continue
         
-        # Find duplicates across files
         hash_to_files = defaultdict(list)
         for file_path, hashes in file_hashes.items():
             for hash_val, line_range in hashes:
                 hash_to_files[hash_val].append((file_path, line_range))
         
-        # Report duplications
         for hash_val, occurrences in hash_to_files.items():
             if len(occurrences) > 1:
                 self.duplications.append({

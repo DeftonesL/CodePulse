@@ -65,12 +65,10 @@ class DeepAnalysisEngine:
         except SyntaxError as e:
             return {'error': f'Syntax error: {e}'}
         
-        # Build graphs
         self.build_control_flow_graph(tree)
         self.build_data_flow_graph(tree)
         self.build_call_graph(tree)
         
-        # Analyze
         results = {
             'control_flow_analysis': self._analyze_control_flow(),
             'data_flow_analysis': self._analyze_data_flow(),
@@ -182,7 +180,6 @@ class DeepAnalysisEngine:
     def _analyze_control_flow(self) -> Dict[str, Any]:
         issues = []
         
-        # Find unreachable nodes
         if len(self.cfg.nodes) > 0:
             root_nodes = [n for n in self.cfg.nodes if self.cfg.in_degree(n) == 0]
             if root_nodes:
@@ -202,7 +199,6 @@ class DeepAnalysisEngine:
                         'message': f'Found {len(unreachable)} unreachable code blocks'
                     })
         
-        # Detect potential infinite loops
         cycles = self._find_cycles()
         for cycle in cycles:
             has_exit = False

@@ -29,15 +29,12 @@ class CloneDetector:
         with open(file_path, 'r', encoding='utf-8') as f:
             lines = f.readlines()
         
-        # Type 1: Exact clones
         self._detect_type1_clones(lines, file_path)
         
-        # Type 2: Renamed clones
         try:
             tree = ast.parse(''.join(lines))
             self._detect_type2_clones(tree, file_path)
         except (SyntaxError, ValueError) as e:
-            # Skip files with syntax errors
             pass
         
         return self.clones
@@ -53,7 +50,6 @@ class CloneDetector:
         with open(file2, 'r', encoding='utf-8') as f:
             lines2 = f.readlines()
         
-        # Compare using sequence matching
         matcher = difflib.SequenceMatcher(None, lines1, lines2)
         
         for match in matcher.get_matching_blocks():
@@ -77,14 +73,12 @@ class CloneDetector:
         return self.clones
     
     def _detect_type1_clones(self, lines: List[str], file_path: str):
-        # Normalize lines (remove whitespace/comments)
         normalized = []
         for line in lines:
             stripped = line.strip()
             if stripped and not stripped.startswith('#'):
                 normalized.append(stripped)
         
-        # Create sliding windows
         window_hashes = defaultdict(list)
         
         for i in range(len(normalized) - self.min_lines + 1):
@@ -92,10 +86,8 @@ class CloneDetector:
             window_hash = self._hash_code_block(window)
             window_hashes[window_hash].append(i)
         
-        # Find duplicates
         for hash_val, positions in window_hashes.items():
             if len(positions) > 1:
-                # Found clone!
                 for j in range(len(positions)):
                     for k in range(j + 1, len(positions)):
                         clone_size = self.min_lines
@@ -117,12 +109,10 @@ class CloneDetector:
     def _detect_type2_clones(self, tree: ast.AST, file_path: str):
         functions = []
         
-        # Extract all functions
         for node in ast.walk(tree):
             if isinstance(node, ast.FunctionDef):
                 functions.append(node)
         
-        # Compare each pair
         for i in range(len(functions)):
             for j in range(i + 1, len(functions)):
                 similarity = self._compare_ast_structure(
@@ -147,7 +137,6 @@ class CloneDetector:
         return hashlib.md5(combined.encode()).hexdigest()
     
     def _calculate_similarity(self, block1: List[str], block2: List[str]) -> float:
-        # Use sequence matcher
         matcher = difflib.SequenceMatcher(None, block1, block2)
         return matcher.ratio()
     
@@ -156,11 +145,9 @@ class CloneDetector:
         node1: ast.AST, 
         node2: ast.AST
     ) -> float:
-        # Get structure fingerprints
         struct1 = self._get_ast_fingerprint(node1)
         struct2 = self._get_ast_fingerprint(node2)
         
-        # Compare
         if not struct1 or not struct2:
             return 0.0
         
@@ -171,10 +158,8 @@ class CloneDetector:
         fingerprint = []
         
         for child in ast.walk(node):
-            # Use node type, not names
             fingerprint.append(type(child).__name__)
             
-            # Add relevant structural info
             if isinstance(child, (ast.For, ast.While)):
                 fingerprint.append('LOOP')
             elif isinstance(child, ast.If):
@@ -195,7 +180,6 @@ class CloneDetector:
                 'recommendations': ['No code clones detected. Great job!']
             }
         
-        # Analyze clones
         by_type = defaultdict(int)
         by_severity = defaultdict(int)
         total_lines = 0
@@ -255,7 +239,6 @@ class SemanticCloneDetector:
     def detect_semantic_clones(self, tree: ast.AST) -> List[Dict]:
         functions = []
         
-        # Extract functions with their behavior
         for node in ast.walk(tree):
             if isinstance(node, ast.FunctionDef):
                 behavior = self._analyze_function_behavior(node)
@@ -265,7 +248,6 @@ class SemanticCloneDetector:
                     'behavior': behavior
                 })
         
-        # Compare behaviors
         for i in range(len(functions)):
             for j in range(i + 1, len(functions)):
                 similarity = self._compare_behaviors(
@@ -295,21 +277,17 @@ class SemanticCloneDetector:
         }
         
         for node in ast.walk(func):
-            # Track operations
             if isinstance(node, ast.BinOp):
                 behavior['operations'].append(type(node.op).__name__)
             
-            # Track returns
             if isinstance(node, ast.Return):
                 if node.value:
                     behavior['returns_type'] = type(node.value).__name__
             
-            # Track function calls
             if isinstance(node, ast.Call):
                 if isinstance(node.func, ast.Name):
                     behavior['calls_functions'].append(node.func.id)
             
-            # Track control flow
             if isinstance(node, (ast.For, ast.While)):
                 behavior['uses_loops'] = True
             
@@ -322,23 +300,19 @@ class SemanticCloneDetector:
         score = 0.0
         factors = 0
         
-        # Same operations?
         if b1['operations'] == b2['operations']:
             score += 0.3
         factors += 0.3
         
-        # Same return type?
         if b1['returns_type'] == b2['returns_type']:
             score += 0.2
         factors += 0.2
         
-        # Same functions called?
         common_calls = set(b1['calls_functions']) & set(b2['calls_functions'])
         if common_calls:
             score += 0.25
         factors += 0.25
         
-        # Similar control flow?
         if b1['uses_loops'] == b2['uses_loops']:
             score += 0.125
         factors += 0.125
@@ -349,7 +323,6 @@ class SemanticCloneDetector:
         
         return score / factors if factors > 0 else 0.0
 
-# Example usage
 if __name__ == '__main__':
     import sys
     import json
@@ -358,7 +331,6 @@ if __name__ == '__main__':
         print("Usage: python clone_detection.py <file.py>")
         sys.exit(1)
     
-    # Detect clones
     detector = CloneDetector(min_lines=6)
     clones = detector.detect_clones_in_file(sys.argv[1])
     
@@ -375,7 +347,6 @@ if __name__ == '__main__':
     for rec in report['recommendations']:
         print(f"  • {rec}")
     
-    # Detect semantic clones
     with open(sys.argv[1], 'r') as f:
         tree = ast.parse(f.read())
     

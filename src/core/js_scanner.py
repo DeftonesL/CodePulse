@@ -6,7 +6,6 @@ class JavaScriptScanner:
     pass
     
     def __init__(self):
-        # Common patterns for JS/TS
         self.patterns = {
             'import': re.compile(r'import\s+.*?\s+from\s+[\'"](.+?)[\'"]'),
             'require': re.compile(r'require\([\'"](.+?)[\'"]\)'),
@@ -27,21 +26,17 @@ class JavaScriptScanner:
             with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
                 content = f.read()
             
-            # Basic metrics
             lines = content.split('\n')
             total_lines = len(lines)
             code_lines = self._count_code_lines(lines)
             
-            # Extract information
             imports = self._extract_imports(content)
             functions = self._extract_functions(content)
             classes = self._extract_classes(content)
             exports = self._extract_exports(content)
             
-            # Calculate complexity
             complexity = self._calculate_complexity(content)
             
-            # Detect features
             has_async = bool(self.patterns['async'].search(content))
             has_promises = bool(self.patterns['promise'].search(content))
             
@@ -77,11 +72,9 @@ class JavaScriptScanner:
         for line in lines:
             stripped = line.strip()
             
-            # Skip empty lines
             if not stripped:
                 continue
             
-            # Handle multiline comments
             if '/*' in stripped:
                 in_multiline_comment = True
             if '*/' in stripped:
@@ -91,7 +84,6 @@ class JavaScriptScanner:
             if in_multiline_comment:
                 continue
             
-            # Skip single-line comments
             if stripped.startswith('//'):
                 continue
             
@@ -102,11 +94,9 @@ class JavaScriptScanner:
     def _extract_imports(self, content: str) -> List[str]:
         imports = []
         
-        # ES6 imports
         for match in self.patterns['import'].finditer(content):
             imports.append(match.group(1))
         
-        # CommonJS requires
         for match in self.patterns['require'].finditer(content):
             imports.append(match.group(1))
         
@@ -115,9 +105,7 @@ class JavaScriptScanner:
     def _extract_functions(self, content: str) -> List[Dict[str, str]]:
         functions = []
         
-        # Find all function definitions
         for match in self.patterns['function'].finditer(content):
-            # Get the first non-None group
             name = next((g for g in match.groups() if g is not None), None)
             if name:
                 functions.append({
@@ -146,7 +134,6 @@ class JavaScriptScanner:
     def _calculate_complexity(self, content: str) -> int:
         complexity = 1  # Base complexity
         
-        # Keywords that add to complexity
         complexity_keywords = [
             r'\bif\b', r'\belse\b', r'\bfor\b', r'\bwhile\b',
             r'\bcase\b', r'\bcatch\b', r'\b\?\b', r'\b&&\b', r'\b\|\|\b'
@@ -160,35 +147,29 @@ class JavaScriptScanner:
     def _detect_file_type(self, file_path: str, content: str) -> str:
         path = Path(file_path)
         
-        # React components
         if '.jsx' in path.suffixes or '.tsx' in path.suffixes:
             return 'React Component'
         
         if 'import React' in content or 'from "react"' in content:
             return 'React Component'
         
-        # Node.js
         if 'require(' in content and 'module.exports' in content:
             return 'Node.js Module'
         
-        # TypeScript
         if path.suffix in ['.ts', '.tsx']:
             if 'interface ' in content or 'type ' in content:
                 return 'TypeScript with Types'
             return 'TypeScript'
         
-        # Vue
         if 'Vue.component' in content or 'new Vue' in content:
             return 'Vue Component'
         
-        # Generic
         return 'JavaScript Module'
 
 def scan_javascript_file(file_path: str) -> Dict[str, Any]:
     scanner = JavaScriptScanner()
     return scanner.scan_file(file_path)
 
-# Example usage
 if __name__ == '__main__':
     import sys
     

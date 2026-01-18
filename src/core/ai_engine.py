@@ -85,14 +85,6 @@ class AIEngine:
             return self._get_mock_response()
         
         try:
-            # TODO: Implement actual API call
-            # Example structure:
-            # import anthropic
-            # response = client.messages.create(
-            #     model=self.model,
-            #     max_tokens=4096,
-            # )
-            # return response.content[0].text
             
             logger.info("Making API call to LLM...")
             return self._get_mock_response()
@@ -150,18 +142,14 @@ class AIEngine:
     def analyze_code(self, code: str, file_path: str, context: Dict[str, Any]) -> AnalysisResult:
         logger.info(f"Analyzing {file_path} with AI engine...")
         
-        # Build the analysis prompt
         prompt = self._build_analysis_prompt(code, file_path, context)
         
-        # Get AI response
         response_text = self._call_llm(prompt)
         
-        # Parse the response
         try:
             response_data = json.loads(response_text)
         except json.JSONDecodeError as e:
             logger.error(f"Failed to parse LLM response: {e}")
-            # Return a default result
             return AnalysisResult(
                 file_path=file_path,
                 overall_score=50.0,
@@ -171,7 +159,6 @@ class AIEngine:
                 complexity_assessment="Unable to assess"
             )
         
-        # Convert issues to CodeIssue objects
         issues = []
         for issue_data in response_data.get('issues', []):
             try:
@@ -188,7 +175,6 @@ class AIEngine:
             except Exception as e:
                 logger.warning(f"Failed to parse issue: {e}")
         
-        # Build the result
         result = AnalysisResult(
             file_path=file_path,
             overall_score=response_data.get('overall_score', 50.0),
@@ -212,17 +198,14 @@ class AIEngine:
                 logger.info(f"Reached max file limit ({max_files})")
                 break
             
-            # Only analyze Python files for now
             if file_meta['language'] != 'Python':
                 continue
             
-            # Read the file content
             try:
                 file_path = os.path.join(scan_results['root_path'], file_meta['path'])
                 with open(file_path, 'r', encoding='utf-8') as f:
                     code = f.read()
                 
-                # Prepare context
                 context = {
                     'imports': file_meta.get('imports', []),
                     'functions': file_meta.get('functions', []),
@@ -230,7 +213,6 @@ class AIEngine:
                     'complexity': file_meta.get('complexity_score', 0)
                 }
                 
-                # Analyze the code
                 result = self.analyze_code(code, file_meta['path'], context)
                 results.append(result)
                 analyzed_count += 1
@@ -242,7 +224,6 @@ class AIEngine:
         return results
 
 def main():
-    # Example code to analyze
     example_code = '''
 def calculate_total(items):
     total = 0
@@ -257,10 +238,8 @@ def get_user_data(user_id):
     return execute_query(query)
 '''
     
-    # Create AI engine
     engine = AIEngine()
     
-    # Analyze the code
     result = engine.analyze_code(
         code=example_code,
         file_path="example.py",
@@ -272,7 +251,6 @@ def get_user_data(user_id):
         }
     )
     
-    # Print results
     print(f"\n{'='*60}")
     print(f"🤖 AI Analysis Results")
     print(f"{'='*60}\n")

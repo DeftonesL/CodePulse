@@ -7,12 +7,10 @@ from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, asdict
 from datetime import datetime
 
-# Import our modules
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from scanner import PulseScanner
 from ai_engine import AIEngine
 
-# Import advanced analyzers
 try:
     from advanced_metrics import AdvancedMetricsCalculator
     from code_patterns import CodePatternsDetector
@@ -34,12 +32,10 @@ class ComprehensiveReport:
     project_path: str
     scan_date: str
     
-    # Scanner results
     total_files: int
     total_lines: int
     languages: Dict[str, int]
     
-    # AI Analysis results
     avg_quality_score: float
     total_issues: int
     critical_issues: int
@@ -47,17 +43,14 @@ class ComprehensiveReport:
     medium_issues: int
     low_issues: int
     
-    # Security results
     security_score: float
     security_issues: int
     critical_vulnerabilities: int
     high_vulnerabilities: int
     
-    # Overall grade
     overall_score: float
     grade: str
     
-    # Detailed findings
     top_issues: List[Dict]
     top_vulnerabilities: List[Dict]
     recommendations: List[str]
@@ -72,7 +65,6 @@ class ComprehensiveAnalyzer:
         self.project_path = Path(project_path).resolve()
         self.api_key = api_key
         
-        # Initialize components
         self.scanner = PulseScanner(str(self.project_path))
         self.ai_engine = AIEngine(api_key=api_key) if api_key else None
         self.security_scanner = SecurityScanner()
@@ -82,19 +74,15 @@ class ComprehensiveAnalyzer:
     def analyze(self, max_files_ai: int = 5) -> ComprehensiveReport:
         logger.info("Starting comprehensive analysis...")
         
-        # Step 1: Scan project structure
         logger.info("Step 1/3: Scanning project structure...")
         structure = self.scanner.scan()
         
-        # Step 2: Security scan
         logger.info("Step 2/3: Running security scan...")
         security_results = self._run_security_scan(structure)
         
-        # Step 3: AI analysis (if API key available)
         logger.info("Step 3/3: Running AI analysis...")
         ai_results = self._run_ai_analysis(structure, max_files_ai)
         
-        # Generate comprehensive report
         logger.info("Generating comprehensive report...")
         report = self._generate_report(structure, ai_results, security_results)
         
@@ -182,7 +170,6 @@ class ComprehensiveAnalyzer:
     
     def _generate_report(self, structure, ai_results, security_results) -> ComprehensiveReport:
         
-        # Count issues by severity
         critical_issues = 0
         high_issues = 0
         medium_issues = 0
@@ -200,7 +187,6 @@ class ComprehensiveAnalyzer:
                     elif issue.severity.value == 'low':
                         low_issues += 1
         
-        # Get top issues
         top_issues = []
         if not ai_results['skipped']:
             all_issues = []
@@ -214,12 +200,10 @@ class ComprehensiveAnalyzer:
                         'description': issue.description[:100] + '...' if len(issue.description) > 100 else issue.description
                     })
             
-            # Sort by severity
             severity_order = {'critical': 0, 'high': 1, 'medium': 2, 'low': 3}
             all_issues.sort(key=lambda x: severity_order.get(x['severity'], 4))
             top_issues = all_issues[:5]  # Top 5
         
-        # Get top vulnerabilities
         top_vulnerabilities = []
         if security_results['issues']:
             for issue_dict in security_results['issues'][:5]:  # Top 5
@@ -231,7 +215,6 @@ class ComprehensiveAnalyzer:
                     'type': issue_dict['vulnerability_type']
                 })
         
-        # Generate recommendations
         recommendations = []
         
         if security_results['security_score'] < 80:
@@ -251,7 +234,6 @@ class ComprehensiveAnalyzer:
         if not recommendations:
             recommendations.append("Excellent! Project is in good shape, keep maintaining quality")
         
-        # Calculate overall score (weighted average)
         quality_weight = 0.4
         security_weight = 0.6
         
@@ -262,7 +244,6 @@ class ComprehensiveAnalyzer:
         
         grade = self._calculate_grade(overall_score)
         
-        # Create report
         report = ComprehensiveReport(
             project_path=str(self.project_path),
             scan_date=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
@@ -307,7 +288,6 @@ class ComprehensiveAnalyzer:
         print("FINAL GRADE:")
         print("-"*70)
         
-        # Color based on score
         if report.overall_score >= 85:
             score_emoji = "[EXCELLENT]"
         elif report.overall_score >= 70:
@@ -386,25 +366,19 @@ def main():
     project_path = sys.argv[1]
     api_key = sys.argv[2] if len(sys.argv) > 2 else None
     
-    # Create analyzer
     analyzer = ComprehensiveAnalyzer(project_path, api_key=api_key)
     
-    # Run analysis
     report = analyzer.analyze(max_files_ai=10)
     
-    # Print report
     analyzer.print_report(report)
     
-    # Create reports directory if it doesn't exist
     reports_dir = "reports"
     os.makedirs(reports_dir, exist_ok=True)
     
-    # Generate filename with timestamp
     from datetime import datetime
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     output_file = os.path.join(reports_dir, f"comprehensive_report_{timestamp}.json")
     
-    # Export to JSON
     analyzer.export_report(report, output_file)
     
     print(f"\nFull report saved to: {output_file}")

@@ -8,14 +8,12 @@ from collections import defaultdict
 import hashlib
 import logging
 
-# Configure logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
 
-# Language extensions mapping
 LANGUAGE_EXTENSIONS = {
     'Python': ['.py', '.pyw'],
     'JavaScript': ['.js', '.jsx', '.mjs'],
@@ -78,59 +76,43 @@ class ProjectStructure:
 class PulseScanner:
     pass
     
-    # Files and directories to exclude from scanning
     EXCLUDE_PATTERNS = {
         '__pycache__', '.git', '.svn', '.hg', 'node_modules',
         '.venv', 'venv', 'env', '.idea', '.vscode', 'dist',
         'build', '*.pyc', '*.pyo', '*.egg-info', '.DS_Store'
     }
     
-    # Supported file extensions and their languages
     LANGUAGE_MAP = {
-        # Python
         '.py': 'Python',
         '.pyw': 'Python',
-        # JavaScript
         '.js': 'JavaScript',
         '.jsx': 'JavaScript',
         '.mjs': 'JavaScript',
-        # TypeScript
         '.ts': 'TypeScript',
         '.tsx': 'TypeScript',
-        # Java
         '.java': 'Java',
-        # C/C++
         '.cpp': 'C++',
         '.cc': 'C++',
         '.cxx': 'C++',
         '.hpp': 'C++',
         '.h': 'C/C++',
         '.c': 'C',
-        # Go
         '.go': 'Go',
-        # Rust
         '.rs': 'Rust',
-        # Ruby
         '.rb': 'Ruby',
-        # PHP
         '.php': 'PHP',
-        # Swift
         '.swift': 'Swift',
-        # Kotlin
         '.kt': 'Kotlin',
         '.kts': 'Kotlin',
-        # Web
         '.html': 'HTML',
         '.htm': 'HTML',
         '.css': 'CSS',
         '.scss': 'CSS',
         '.sass': 'CSS',
-        # Data
         '.json': 'JSON',
         '.xml': 'XML',
         '.yml': 'YAML',
         '.yaml': 'YAML',
-        # Other
         '.md': 'Markdown',
         '.sh': 'Shell',
         '.bash': 'Shell',
@@ -148,11 +130,9 @@ class PulseScanner:
     def should_exclude(self, path: pathlib.Path) -> bool:
         for pattern in self.EXCLUDE_PATTERNS:
             if pattern.startswith('*'):
-                # Wildcard pattern
                 if path.name.endswith(pattern[1:]):
                     return True
             else:
-                # Direct match
                 if pattern in path.parts:
                     return True
         return False
@@ -161,7 +141,6 @@ class PulseScanner:
         sha256_hash = hashlib.sha256()
         try:
             with open(file_path, "rb") as f:
-                # Read in chunks for memory efficiency
                 for byte_block in iter(lambda: f.read(4096), b""):
                     sha256_hash.update(byte_block)
             return sha256_hash.hexdigest()
@@ -181,12 +160,9 @@ class PulseScanner:
             with open(file_path, 'r', encoding='utf-8') as f:
                 source_code = f.read()
             
-            # Parse the source code into an AST
             tree = ast.parse(source_code, filename=str(file_path))
             
-            # Walk through the AST
             for node in ast.walk(tree):
-                # Extract imports
                 if isinstance(node, ast.Import):
                     for alias in node.names:
                         result['imports'].append(alias.name)
@@ -194,7 +170,6 @@ class PulseScanner:
                     if node.module:
                         result['imports'].append(node.module)
                 
-                # Extract function definitions
                 elif isinstance(node, ast.FunctionDef):
                     func_info = {
                         'name': node.name,
@@ -209,7 +184,6 @@ class PulseScanner:
                                                if isinstance(_, (ast.If, ast.For, ast.While, 
                                                                ast.ExceptHandler, ast.With)))
                 
-                # Extract class definitions
                 elif isinstance(node, ast.ClassDef):
                     class_info = {
                         'name': node.name,
@@ -219,14 +193,12 @@ class PulseScanner:
                         'bases': [base.id for base in node.bases if isinstance(base, ast.Name)]
                     }
                     
-                    # Get class methods
                     for item in node.body:
                         if isinstance(item, (ast.FunctionDef, ast.AsyncFunctionDef)):
                             class_info['methods'].append(item.name)
                     
                     result['classes'].append(class_info)
             
-            # Normalize complexity score (0-100)
             total_functions = len(result['functions']) + sum(len(c['methods']) for c in result['classes'])
             if total_functions > 0:
                 result['complexity'] = min(100, (result['complexity'] / total_functions) * 10)
@@ -240,17 +212,13 @@ class PulseScanner:
     
     def scan_file(self, file_path: pathlib.Path) -> Optional[FileMetadata]:
         try:
-            # Get file stats
             stat = file_path.stat()
             
-            # Count lines
             with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
                 lines = sum(1 for _ in f)
             
-            # Determine language
             language = self.LANGUAGE_MAP.get(file_path.suffix, 'Unknown')
             
-            # Create metadata object
             metadata = FileMetadata(
                 path=str(file_path.relative_to(self.root_path)),
                 size=stat.st_size,
@@ -259,7 +227,6 @@ class PulseScanner:
                 file_hash=self.calculate_file_hash(file_path)
             )
             
-            # Perform deep analysis for Python files
             if file_path.suffix == '.py':
                 analysis = self.analyze_python_ast(file_path)
                 metadata.imports = analysis['imports']
@@ -276,14 +243,12 @@ class PulseScanner:
     def build_dependency_graph(self) -> Dict[str, List[str]]:
         graph = defaultdict(list)
         
-        # Create a map of module names to file paths
         module_to_file = {}
         for file_meta in self.structure.files:
             if file_meta.language == 'Python':
                 module_name = file_meta.path.replace('/', '.').replace('.py', '')
                 module_to_file[module_name] = file_meta.path
         
-        # Build the graph
         for file_meta in self.structure.files:
             if file_meta.language == 'Python':
                 for import_name in file_meta.imports:
@@ -295,14 +260,11 @@ class PulseScanner:
     def scan(self) -> ProjectStructure:
         logger.info(f"Starting scan of {self.root_path}")
         
-        # Track statistics
         language_counts = defaultdict(int)
         
-        # Recursively scan all files
         for root, dirs, files in os.walk(self.root_path, followlinks=self.follow_symlinks):
             current_path = pathlib.Path(root)
             
-            # Calculate depth
             try:
                 depth = len(current_path.relative_to(self.root_path).parts)
             except ValueError:
@@ -311,28 +273,23 @@ class PulseScanner:
             if depth > self.max_depth:
                 continue
             
-            # Filter out excluded directories
             dirs[:] = [d for d in dirs if not self.should_exclude(current_path / d)]
             
-            # Scan each file
             for filename in files:
                 file_path = current_path / filename
                 
                 if self.should_exclude(file_path):
                     continue
                 
-                # Check if it's a supported file type
                 if file_path.suffix not in self.LANGUAGE_MAP:
                     continue
                 
-                # Scan the file
                 metadata = self.scan_file(file_path)
                 if metadata:
                     self.structure.files.append(metadata)
                     self.structure.total_lines += metadata.lines
                     language_counts[metadata.language] += 1
         
-        # Update structure with aggregated data
         self.structure.total_files = len(self.structure.files)
         self.structure.languages = dict(language_counts)
         self.structure.dependency_graph = self.build_dependency_graph()
@@ -368,7 +325,6 @@ def main():
         print(f"  • {lang}: {count} files")
     print(f"\nDependencies Found: {len(structure.dependency_graph)} modules")
     
-    # Export to JSON
     scanner.export_json('scan_results.json')
     print(f"\n✅ Full results exported to scan_results.json")
 

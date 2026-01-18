@@ -43,7 +43,6 @@ class AdvancedSecurityScanner:
         except SyntaxError:
             return []
         
-        # Run all security checks
         self._detect_sql_injection(tree, file_path, lines)
         self._detect_xss(tree, file_path, lines)
         self._detect_command_injection(tree, file_path, lines)
@@ -63,27 +62,21 @@ class AdvancedSecurityScanner:
     
     def _load_secrets_patterns(self) -> List[tuple]:
         return [
-            # API Keys
             (r'api[_-]?key["\s]*[:=]["\s]*([a-zA-Z0-9]{20,})', 'API Key', 'HIGH'),
             (r'api[_-]?secret["\s]*[:=]["\s]*([a-zA-Z0-9]{20,})', 'API Secret', 'HIGH'),
             
-            # AWS
             (r'AKIA[0-9A-Z]{16}', 'AWS Access Key', 'CRITICAL'),
             (r'aws[_-]?secret[_-]?access[_-]?key["\s]*[:=]["\s]*([a-zA-Z0-9/+=]{40})', 'AWS Secret', 'CRITICAL'),
             
-            # Database
             (r'postgresql://[^:]+:[^@]+@', 'PostgreSQL Connection String', 'CRITICAL'),
             (r'mysql://[^:]+:[^@]+@', 'MySQL Connection String', 'CRITICAL'),
             (r'mongodb://[^:]+:[^@]+@', 'MongoDB Connection String', 'CRITICAL'),
             
-            # Private Keys
             (r'-----BEGIN (?:RSA |EC |DSA )?PRIVATE KEY-----', 'Private Key', 'CRITICAL'),
             
-            # Tokens
             (r'github[_-]?token["\s]*[:=]["\s]*([a-zA-Z0-9]{35,})', 'GitHub Token', 'HIGH'),
             (r'slack[_-]?token["\s]*[:=]["\s]*(xox[a-zA-Z]-[a-zA-Z0-9-]+)', 'Slack Token', 'HIGH'),
             
-            # Generic Secrets
             (r'password["\s]*[:=]["\s]*["\'](?!.*\{|\}|%|\$)[^"\']{8,}["\']', 'Hardcoded Password', 'HIGH'),
             (r'secret["\s]*[:=]["\s]*["\'](?!.*\{|\}|%|\$)[^"\']{8,}["\']', 'Hardcoded Secret', 'HIGH'),
         ]
@@ -104,12 +97,9 @@ class AdvancedSecurityScanner:
     def _detect_sql_injection(self, tree: ast.AST, file_path: str, lines: List[str]):
         for node in ast.walk(tree):
             if isinstance(node, ast.Call):
-                # Check for string formatting in SQL
                 if self._is_sql_call(node):
-                    # Check if using string concatenation/formatting
                     for arg in ast.walk(node):
                         if isinstance(arg, (ast.BinOp, ast.JoinedStr)):
-                            # Check if concatenating with variables
                             if self._has_variable_in_sql(arg):
                                 self.issues.append(SecurityIssue(
                                     type='SQL Injection',
@@ -141,7 +131,6 @@ class AdvancedSecurityScanner:
     
     def _detect_xss(self, tree: ast.AST, file_path: str, lines: List[str]):
         for node in ast.walk(tree):
-            # Check for dangerous functions
             if isinstance(node, ast.Call):
                 if isinstance(node.func, ast.Attribute):
                     if node.func.attr in ['innerHTML', 'write']:
@@ -158,7 +147,6 @@ class AdvancedSecurityScanner:
                             owasp='A03:2021 - Injection'
                         ))
                 
-                # Check for eval
                 if isinstance(node.func, ast.Name):
                     if node.func.id == 'eval':
                         self.issues.append(SecurityIssue(
@@ -187,7 +175,6 @@ class AdvancedSecurityScanner:
                     func_name = node.func.id
                 
                 if func_name in dangerous_functions:
-                    # Check if shell=True
                     has_shell = False
                     for keyword in node.keywords:
                         if keyword.arg == 'shell' and isinstance(keyword.value, ast.Constant):
@@ -213,7 +200,6 @@ class AdvancedSecurityScanner:
             if isinstance(node, ast.Call):
                 if isinstance(node.func, ast.Name):
                     if node.func.id == 'open':
-                        # Check if filename comes from user input
                         if node.args and isinstance(node.args[0], (ast.Name, ast.BinOp, ast.JoinedStr)):
                             self.issues.append(SecurityIssue(
                                 type='Path Traversal',
@@ -278,7 +264,6 @@ class AdvancedSecurityScanner:
             if isinstance(node, ast.Call):
                 if isinstance(node.func, ast.Attribute):
                     if node.func.attr in ['loads', 'load']:
-                        # Check if pickle
                         if isinstance(node.func.value, ast.Name):
                             if node.func.value.id == 'pickle':
                                 self.issues.append(SecurityIssue(
@@ -319,7 +304,6 @@ class AdvancedSecurityScanner:
             if isinstance(node, ast.Call):
                 if isinstance(node.func, ast.Attribute):
                     if node.func.attr in http_functions:
-                        # Check if URL comes from user input
                         if node.args and isinstance(node.args[0], (ast.Name, ast.BinOp, ast.JoinedStr)):
                             self.issues.append(SecurityIssue(
                                 type='Server-Side Request Forgery (SSRF)',
@@ -336,11 +320,9 @@ class AdvancedSecurityScanner:
     
     def _detect_authentication_issues(self, tree: ast.AST, file_path: str, lines: List[str]):
         for node in ast.walk(tree):
-            # Check for == comparison with passwords
             if isinstance(node, ast.Compare):
                 for op in node.ops:
                     if isinstance(op, ast.Eq):
-                        # Check if comparing with password-like variables
                         for comparator in [node.left] + node.comparators:
                             if isinstance(comparator, ast.Name):
                                 if 'password' in comparator.id.lower():
@@ -366,7 +348,6 @@ class AdvancedSecurityScanner:
                 for target in node.targets:
                     if isinstance(target, ast.Name):
                         if 'session' in target.id.lower():
-                            # Check if using secure flags
                             if isinstance(node.value, ast.Dict):
                                 keys = [k.value for k in node.value.keys if isinstance(k, ast.Constant)]
                                 if 'secure' not in [k.lower() if isinstance(k, str) else k for k in keys]:
@@ -417,7 +398,6 @@ class AdvancedSecurityScanner:
                             pattern_node = node.args[0]
                             if isinstance(pattern_node, ast.Constant):
                                 pattern = str(pattern_node.value)
-                                # Simple ReDoS check
                                 if '(.*)*' in pattern or '(.+)+' in pattern:
                                     self.issues.append(SecurityIssue(
                                         type='Regular Expression DoS',
@@ -440,7 +420,6 @@ class AdvancedSecurityScanner:
             by_severity[issue.severity] += 1
             by_category[issue.category] = by_category.get(issue.category, 0) + 1
         
-        # Calculate security score
         score = 100.0
         score -= by_severity['CRITICAL'] * 25
         score -= by_severity['HIGH'] * 15

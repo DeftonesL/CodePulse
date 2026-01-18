@@ -45,7 +45,6 @@ class CodePatternsDetector:
             
             tree = ast.parse(code)
             
-            # Detect various patterns
             self._detect_design_patterns(tree, file_path)
             self._detect_anti_patterns(tree, file_path, code)
             self._detect_code_smells(tree, file_path, code)
@@ -63,7 +62,6 @@ class CodePatternsDetector:
                 class_name = node.name
                 methods = [n.name for n in node.body if isinstance(n, ast.FunctionDef)]
                 
-                # Singleton pattern
                 if '__new__' in methods or '_instance' in [
                     attr.target.id for attr in node.body 
                     if isinstance(attr, ast.Assign) 
@@ -80,7 +78,6 @@ class CodePatternsDetector:
                         example="class Singleton:\n    _instance = None\n    def __new__(cls):\n        if not cls._instance:\n            cls._instance = super().__new__(cls)\n        return cls._instance"
                     ))
                 
-                # Factory pattern
                 if 'create' in methods or 'factory' in class_name.lower():
                     self.patterns.append(DetectedPattern(
                         name="Factory Pattern",
@@ -93,7 +90,6 @@ class CodePatternsDetector:
                         example="class Factory:\n    def create(self, type):\n        if type == 'A':\n            return ClassA()\n        return ClassB()"
                     ))
                 
-                # Builder pattern
                 if any(m.startswith('with_') or m.startswith('set_') for m in methods) and 'build' in methods:
                     self.patterns.append(DetectedPattern(
                         name="Builder Pattern",
@@ -110,7 +106,6 @@ class CodePatternsDetector:
         
         for node in ast.walk(tree):
             if isinstance(node, ast.ClassDef):
-                # God Class (too many responsibilities)
                 method_count = sum(1 for n in node.body if isinstance(n, ast.FunctionDef))
                 attribute_count = sum(1 for n in node.body if isinstance(n, ast.Assign))
                 
@@ -127,7 +122,6 @@ class CodePatternsDetector:
                     ))
             
             if isinstance(node, ast.FunctionDef):
-                # Long Method
                 function_lines = []
                 for stmt in ast.walk(node):
                     if hasattr(stmt, 'lineno'):
@@ -145,7 +139,6 @@ class CodePatternsDetector:
                         example="# Bad:\ndef do_everything():\n    # 50+ lines\n\n# Good:\ndef process():\n    validate()\n    transform()\n    save()"
                     ))
                 
-                # Too Many Parameters
                 param_count = len(node.args.args)
                 if param_count > 5:
                     self.patterns.append(DetectedPattern(
@@ -159,7 +152,6 @@ class CodePatternsDetector:
                         example="# Bad:\ndef func(a, b, c, d, e, f):\n    pass\n\n# Good:\n@dataclass\nclass Config:\n    a: int\n    b: str\ndef func(config: Config):\n    pass"
                     ))
         
-        # Duplicated Code
         lines = code.split('\n')
         line_counts = {}
         for i, line in enumerate(lines):
@@ -186,10 +178,8 @@ class CodePatternsDetector:
     def _detect_code_smells(self, tree: ast.AST, file_path: str, code: str):
         
         for node in ast.walk(tree):
-            # Magic Numbers
             if isinstance(node, ast.Constant):
                 if isinstance(node.value, (int, float)):
-                    # Skip common values
                     if node.value not in [0, 1, -1, 2, 10, 100, 1000]:
                         self.patterns.append(DetectedPattern(
                             name="Magic Number",
@@ -202,7 +192,6 @@ class CodePatternsDetector:
                             example=f"# Bad:\nif x > {node.value}:\n\n# Good:\nMAX_LIMIT = {node.value}\nif x > MAX_LIMIT:"
                         ))
             
-            # Nested If Statements
             if isinstance(node, ast.If):
                 depth = self._calculate_nesting_depth(node)
                 if depth > 3:
@@ -217,7 +206,6 @@ class CodePatternsDetector:
                         example="# Bad:\nif a:\n    if b:\n        if c:\n            do()\n\n# Good:\nif not a:\n    return\nif not b:\n    return\nif c:\n    do()"
                     ))
             
-            # Empty Except Block
             if isinstance(node, ast.ExceptHandler):
                 if len(node.body) == 1 and isinstance(node.body[0], ast.Pass):
                     self.patterns.append(DetectedPattern(
@@ -235,7 +223,6 @@ class CodePatternsDetector:
         
         for node in ast.walk(tree):
             if isinstance(node, ast.FunctionDef):
-                # Missing Docstring
                 docstring = ast.get_docstring(node)
                 if not docstring and not node.name.startswith('_'):
                     self.patterns.append(DetectedPattern(
@@ -249,7 +236,6 @@ class CodePatternsDetector:
                         example='def func(x: int) -> str:\n    """Convert int to string.\n    \n    Args:\n        x: Number to convert\n        \n    Returns:\n        String representation\n    """\n    return str(x)'
                     ))
                 
-                # Missing Type Hints
                 has_type_hints = (
                     node.returns is not None or 
                     any(arg.annotation for arg in node.args.args)
@@ -286,15 +272,12 @@ class CodePatternsDetector:
         }
         
         for pattern in self.patterns:
-            # By type
             type_key = pattern.type.value
             summary['by_type'][type_key] = summary['by_type'].get(type_key, 0) + 1
             
-            # By severity
             sev_key = pattern.severity.value
             summary['by_severity'][sev_key] = summary['by_severity'].get(sev_key, 0) + 1
             
-            # Critical issues
             if pattern.severity in [Severity.ERROR, Severity.CRITICAL]:
                 summary['critical_issues'].append({
                     'name': pattern.name,
@@ -304,7 +287,6 @@ class CodePatternsDetector:
         
         return summary
 
-# Example usage
 if __name__ == '__main__':
     import sys
     import json

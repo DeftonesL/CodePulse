@@ -63,7 +63,6 @@ def analyze_file_wrapper(file_path):
         lines = code.split('\n')
         non_empty_lines = [l for l in lines if l.strip()]
         
-        # Language detection
         language_map = {
             '.py': 'Python', '.pyw': 'Python',
             '.js': 'JavaScript', '.jsx': 'JavaScript', '.mjs': 'JavaScript',
@@ -94,7 +93,6 @@ def analyze_file_wrapper(file_path):
         
         language = language_map.get(ext, 'Unknown')
         
-        # Basic metrics
         result = {
             'file': str(file_path),
             'language': language,
@@ -104,7 +102,6 @@ def analyze_file_wrapper(file_path):
             'extension': ext
         }
         
-        # Python-specific analysis
         if ext == '.py':
             try:
                 import ast
@@ -117,7 +114,6 @@ def analyze_file_wrapper(file_path):
             except:
                 pass
         
-        # JavaScript/TypeScript analysis
         elif ext in ['.js', '.jsx', '.ts', '.tsx']:
             result.update({
                 'functions': len(re.findall(r'\bfunction\s+\w+|\b\w+\s*=\s*(?:async\s+)?(?:function|\(.*?\)\s*=>)', code)),
@@ -125,7 +121,6 @@ def analyze_file_wrapper(file_path):
                 'imports': len(re.findall(r'\bimport\s+.*?from|require\(', code)),
             })
         
-        # Java analysis
         elif ext == '.java':
             result.update({
                 'classes': len(re.findall(r'\b(?:public|private|protected)?\s*class\s+\w+', code)),
@@ -133,7 +128,6 @@ def analyze_file_wrapper(file_path):
                 'imports': len(re.findall(r'\bimport\s+', code)),
             })
         
-        # C/C++ analysis
         elif ext in ['.c', '.cpp', '.cc', '.cxx', '.h', '.hpp']:
             result.update({
                 'functions': len(re.findall(r'\b[\w:]+\s+\w+\s*\([^)]*\)\s*\{', code)),
@@ -141,7 +135,6 @@ def analyze_file_wrapper(file_path):
                 'includes': len(re.findall(r'#include\s*[<"]', code)),
             })
         
-        # Go analysis
         elif ext == '.go':
             result.update({
                 'functions': len(re.findall(r'\bfunc\s+\w+', code)),
@@ -149,7 +142,6 @@ def analyze_file_wrapper(file_path):
                 'imports': len(re.findall(r'\bimport\s+', code)),
             })
         
-        # Rust analysis
         elif ext == '.rs':
             result.update({
                 'functions': len(re.findall(r'\bfn\s+\w+', code)),
@@ -157,11 +149,9 @@ def analyze_file_wrapper(file_path):
                 'traits': len(re.findall(r'\btrait\s+\w+', code)),
             })
         
-        # Security & Quality checks
         security_issues = []
         quality_issues = []
         
-        # Common security patterns
         if 'eval(' in code:
             security_issues.append('Use of eval() detected')
         if re.search(r'password\s*=\s*["\']', code, re.I):
@@ -169,7 +159,6 @@ def analyze_file_wrapper(file_path):
         if 'exec(' in code:
             security_issues.append('Use of exec() detected')
         
-        # Quality checks
         if len(non_empty_lines) > 500:
             quality_issues.append('Large file (>500 lines)')
         if len(code) > 10000:
