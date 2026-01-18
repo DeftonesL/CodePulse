@@ -1,0 +1,10 @@
+*.py linguist-detectable=true
+*.sh linguist-detectable=true
+*.bat linguist-detectable=true
+*.ps1 linguist-detectable=true
+*.js linguist-detectable=true
+*.html linguist-detectable=true
+*.md linguist-documentation
+*.txt linguist-documentation
+reports/* linguist-generated
+tests/* linguist-vendored=false
