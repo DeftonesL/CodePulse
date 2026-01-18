@@ -1,10 +1,12 @@
 *.py linguist-detectable=true
-*.sh linguist-detectable=true
-*.bat linguist-detectable=true
-*.ps1 linguist-detectable=true
-*.js linguist-detectable=true
-*.html linguist-detectable=true
-*.md linguist-documentation
-*.txt linguist-documentation
-reports/* linguist-generated
-tests/* linguist-vendored=false
+*.sh linguist-detectable=true linguist-language=Shell
+*.bat linguist-detectable=true linguist-language=Batchfile
+*.ps1 linguist-detectable=true linguist-language=PowerShell
+*.js linguist-detectable=true linguist-language=JavaScript
+*.html linguist-detectable=true linguist-language=HTML
+*.json linguist-detectable=true linguist-language=JSON
+*.toml linguist-detectable=true linguist-language=TOML
+*.txt linguist-detectable=false
+*.md linguist-documentation=true linguist-detectable=false
+reports/* linguist-generated=true
+docs/* linguist-documentation=true
